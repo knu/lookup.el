@@ -28,7 +28,7 @@
 (defvar image-types nil) ;; for emacs-20.7 etc.
 
 (cond
- ((featurep 'xemacs)
+ ((xemacs-p)
   (defun lookup-glyph-compose (spec)
     (cond
      ((stringp spec)
@@ -73,7 +73,7 @@
 
   ;; to handle inline-image
 
-  (defun  lookup-gaiji-glyph-insert (glyph)
+  (defun lookup-gaiji-glyph-insert (glyph)
     (set-extent-property (make-extent (point) (point))
 			 'end-glyph glyph))
   
@@ -87,7 +87,7 @@
 			 image-decode-tiff nil t image-mode))))
       (insert-file-contents-internal file))))
 
- ((and window-system (memq 'xbm image-types))
+ ((memq 'xbm image-types)
   (defun lookup-gaiji-glyph-compose (spec)
     (cond
      ((eq (aref spec 0) 'xbm)

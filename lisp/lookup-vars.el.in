@@ -391,7 +391,7 @@ This hook will run just after loading `lookup-init-file' and
 (defvar lookup-gaiji-paste-function nil)
 
 (defun lookup-init-gaiji-functions ()
-  (cond ((featurep 'xemacs)
+  (cond ((xemacs-p)
 	 (setq lookup-gaiji-compose-function 'lookup-glyph-compose
 	       lookup-gaiji-paste-function 'lookup-glyph-paste))
 	(lookup-use-bitmap

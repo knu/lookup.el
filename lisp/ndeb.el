@@ -323,7 +323,7 @@
  ndeb-use-inline-image
  window-system
  (or
-  (featurep 'xemacs)
+  (xemacs-p)
   (memq 'xbm image-types))
  (require 'ndeb-image))
 

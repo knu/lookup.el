@@ -24,6 +24,8 @@
 
 (message "loading ndeb-image...")
 
+(require 'lookup-glyph)
+
 (defcustom ndeb-image-cache-dir
   (expand-file-name "~/.lookup-image-cache")
   "*インラインイメージのテンポラリファイルをおくディレクトリ。"
@@ -37,7 +39,7 @@
  (cond
   ((memq 'xbm image-types) ;; emacs21
    (put 'ndeb :arrange-table '((image . ndeb-expand-images))))
-  ((featurep 'xemacs)
+  ((xemacs-p)
    (put 'ndeb :adjust-table '((image . ndeb-expand-images))))))
 
 (defun ndeb-expand-mono-images (entry)

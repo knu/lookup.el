@@ -71,7 +71,7 @@
       (if (file-exists-p (expand-file-name file mypaedia-data-directory))
 	  (setq file (expand-file-name file mypaedia-data-directory)))
       (if mypaedia-image-inline
-	  (cond ((featurep 'xemacs)
+	  (cond ((xemacs-p)
 		 (progn
 		   (replace-match "\n")
 		   (let ((offset (mypaedia-string-to-number offset))
@@ -292,7 +292,7 @@
 (setq lookup-support-options
       (list ':gaiji-table mypaedia-gaiji-table
 	    (cond
-	     ((featurep 'xemacs)
+	     ((xemacs-p)
 	      ':adjust-table)
 	     ((memq 'xbm image-types)
 	      ':arrange-table))

@@ -82,6 +82,8 @@ This can be used when you cannot finish Emacs because of an error of Lookup."
   (lookup-init-gaiji-functions)
   (lookup-init-complement-autoload))
 
+(defvar lookup-support-autoload-alist nil)
+
 (defun lookup-init-complement-autoload ()
   (if lookup-complement-directory
       (load (expand-file-name "loaddef.el" lookup-complement-directory))
@@ -685,7 +687,7 @@ Otherwise, this is the same with \\[lookup-previous-history]."
 
 (defun lookup-adjust-content (entry)
   (let ((funcs (lookup-dictionary-adjusts (lookup-entry-dictionary entry))))
-    (when (featurep 'xemacs) ;; remove gaiji-glyph definition
+    (when (xemacs-p) ;; remove gaiji-glyph definition
       (mapcar-extents
        '(lambda (foo)
 	  (set-extent-begin-glyph foo nil))))
