@@ -25,5 +25,5 @@ lookup-autoloads.el: $(SOURCES)
 	@$(EMACS) -batch -l lookup-compile.el -f lookup-autoload $(SOURCES)
 
 install: all
-	test -d @lispdir@/lookup || mkdir @lispdir@/lookup
-	install $(INSTALLFILES) @lispdir@/lookup
+       test -d $(lispdir)/lookup || mkdir $(lispdir)/lookup
+       $(INSTALL) -m 0644  $(INSTALLFILES) $(lispdir)/lookup
