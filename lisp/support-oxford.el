@@ -314,14 +314,13 @@
   (and
    (search-forward ". -" nil t)
    (insert "\n "))
-  (goto-char (point-min))
-  (replace-string "</HEAD1><HEAD1>" "" nil)
-  (goto-char (point-min))  
-  (replace-string "</HEAD2><HEAD2>" "" nil)
-  (goto-char (point-min))  
-  (replace-string "</HEAD3><HEAD3>" "" nil)
-  (goto-char (point-min))
-  (replace-string "</HEAD1>-<HEAD1>" "-" nil)
+
+  (format-replace-strings
+   '(("</HEAD1><HEAD1>" . "")
+     ("</HEAD2><HEAD2>" . "")
+     ("</HEAD3><HEAD3>" . "")
+     ("</HEAD1>-<HEAD1>" . "-")))
+
   (goto-char (point-min))
   (while (re-search-forward "<HEAD1>\\([^<]*\\)</HEAD1>" nil t)
     (put-text-property (match-beginning 1)
@@ -370,39 +369,23 @@
   (goto-char (point-min))
   (replace-string "</HEAD2> <HEAD1>" "" nil)
 
-
-  (goto-char (point-min))
-  (save-excursion
-    (save-restriction
-      (narrow-to-region
-       (point-min)
-       (if (search-forward oxford-delimiter nil t)
-	   (point)
-	 (point-max)))
-
-      (goto-char (point-min))
-      (replace-string "\. <HEAD2>" "\n" nil)
-      (goto-char (point-min))
-      (replace-string "\) <HEAD2>" ")\n" nil)
-      (goto-char (point-min))
-      (replace-string "\. <HEAD3>" ".\n " nil)
-      (goto-char (point-min))
-      (replace-string "\) <HEAD3>" ")\n " nil)))
-
-  (goto-char (point-min))
-  (replace-string "<HEAD1>" "" nil)
-  (goto-char (point-min))
-  (replace-string "</HEAD1>" "" nil)
-  (goto-char (point-min))
-  (replace-string "<HEAD2>" "" nil)
-  (goto-char (point-min))
-  (replace-string "</HEAD2>" "" nil)
-  (goto-char (point-min))
-  (replace-string "<HEAD3>" "" nil)
-  (goto-char (point-min))
-  (replace-string "</HEAD3>" "" nil)
-
-  )
+  (format-replace-strings
+   '((". <HEAD2>" . "\n")
+     (") <HEAD2>" . ")\n")
+     (". <HEAD3>" . ".\n ")
+     (") <HEAD3>" . ")\n "))
+   nil
+   (point-min)
+   (or (search-forward oxford-delimiter nil t)
+       (point-max)))
+  
+  (format-replace-strings
+   '(("<HEAD1>"  . "")
+     ("</HEAD1>" . "")
+     ("<HEAD2>"  . "")
+     ("</HEAD2>" . "")
+     ("<HEAD3>"  . "")
+     ("</HEAD3>" . ""))))
 
 (setq lookup-support-options
       (list ':title "Oxford Dictionary"
