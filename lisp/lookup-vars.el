@@ -73,6 +73,11 @@ that matches a dictionary ID, and FILE is a support file name."
   :type 'symbol
   :group 'lookup-general-options)
 
+(defcustom lookup-save-configuration t
+  "*Non-nil means Lookup will save/restore the window configuration."
+  :type 'boolean
+  :group 'lookup-general-options)
+
 (defcustom lookup-initial-memorandum
   (lambda (entry)
     (format "Title: %s\nEntry: %s\nDate: %s\n\n"
@@ -305,8 +310,15 @@ This variable should be only set in support files.")
   '((replace   . lookup-arrange-replaces)
     (reference . lookup-arrange-references)
     (gaiji     . lookup-arrange-gaijis)
+    (image     . nil)
     (structure . lookup-arrange-structure)
     (fill      . lookup-arrange-fill-lines)))
+
+(defvar lookup-adjust-table
+  '((gaiji     . lookup-adjust-show-gaijis)
+    (image     . nil)
+    (example   . lookup-adjust-hide-examples)
+    (reference . lookup-adjust-check-references)))
 
 (defvar lookup-load-hook nil
   "*List of functions called after loading Lookup.
