@@ -125,8 +125,8 @@ FILE is a complement file name."
   :type 'boolean
   :group 'lookup-general-options)
 
-(defcustom lookup-use-kakasi (or (locate-library "kakasi" nil exec-path)
-				 (locate-library "kakasi.exe" nil exec-path))
+(defcustom lookup-use-kakasi
+  nil
   "*Non-nil を指定すると、いくつかの局面で KAKASI が利用される。
 これは現在、具体的には日本語のデフォルトの検索語の切り出しに用いている。"
   :type 'boolean
