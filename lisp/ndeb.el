@@ -238,22 +238,34 @@
     (ndeb-process-require (format "search \"%s\" %d"
 				  (lookup-query-string query) (or offset 0))
       (lambda (process)
-	(let (code heading last-code last-heading entry entries)
-	  (while (re-search-forward "^[^.]+\\. \\([^\t]+\\)\t\\(.*\\)" nil t)
-	    (setq code (match-string 1) heading (match-string 2))
-	    ;; remove duplicate entries
-	    (when (or (not (string= code last-code))
-		      (not (string= heading last-heading)))
-	      (setq entries (cons (ndeb-new-entry 'regular code heading)
-				  entries))
-	      (setq last-code code last-heading heading)))
-	  (when (re-search-forward "<more point=\\([0-9]*\\)>" nil t)
-	    (setq entry (ndeb-new-entry 'dynamic "more"))
-	    (lookup-put-property entry 'ndeb-query query)
-	    (lookup-put-property entry 'ndeb-offset
-				 (string-to-int (match-string 1)))
-	    (setq entries (cons entry entries)))
+	(let (code heading entry entries result result-list)
+	  (while (re-search-forward "^[^.]+\\. \\(\\([^\t]+\\)\t\\(.*\\)\\)" nil t)
+	    (setq result  (match-string 1)
+		  code    (match-string 2)
+		  heading (match-string 3))
+	    (if (member result result-list)
+		nil
+	      (setq result-list (cons result result-list)
+		    entries (cons (ndeb-new-entry 'regular code heading) entries))))
 	  (nreverse entries))))))
+	      
+
+;;;	(let (code heading last-code last-heading entry entries)
+;;;	  (while (re-search-forward "^[^.]+\\. \\([^\t]+\\)\t\\(.*\\)" nil t)
+;;;	    (setq code (match-string 1) heading (match-string 2))
+;;;	    ;; remove duplicate entries
+;;;	    (when (or (not (string= code last-code))
+;;;		      (not (string= heading last-heading)))
+;;;	      (setq entries (cons (ndeb-new-entry 'regular code heading)
+;;;				  entries))
+;;;	      (setq last-code code last-heading heading)))
+;;;	  (when (re-search-forward "<more point=\\([0-9]*\\)>" nil t)
+;;;	    (setq entry (ndeb-new-entry 'dynamic "more"))
+;;;	    (lookup-put-property entry 'ndeb-query query)
+;;;	    (lookup-put-property entry 'ndeb-offset
+;;;				 (string-to-int (match-string 1)))
+;;;	    (setq entries (cons entry entries)))
+;;;	  (nreverse entries))))))
 
 (put 'ndeb :dynamic 'ndeb-dynamic-search)
 (defun ndeb-dynamic-search (entry)
@@ -323,9 +335,12 @@
 (and
  ndeb-use-inline-image
  window-system
- (or
-  (featurep 'xemacs)
-  (memq 'xbm image-types))
- (require 'ndeb-image))
-
+ (cond
+  ((xemacs-p)
+   (require 'ndeb-image))
+  ((featurep 'bitmap)
+   (require 'ndeb-bitmap))
+  ((memq 'xbm image-types)
+   (require 'ndeb-image))))
+  
 ;;; ndeb.el ends here
