@@ -7,7 +7,7 @@ SOURCES = lookup.el lookup-utils.el lookup-types.el lookup-vars.el \
 	support-loaddef.el support-chiezo.el support-foldoc.el \
 	support-oxford.el support-chujiten.el support-genius.el \
 	support-rfc1983.el support-colloc.el support-iwakoku.el \
-	support-rika.el support-comp.el support-jargon.el support-srd-fpw.el \
+	support-rika.el support-comp.el support-jargon.el \
 	support-mypaedia.el support-srd.el support-nhd.el support-vera.el
 ELCFILES = $(SOURCES:.el=.elc)
 EXTRA_DIST = $(SOURCES) lookup-compile.el
