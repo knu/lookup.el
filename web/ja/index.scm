@@ -22,7 +22,7 @@
 
    ##(h1 "Latest Release")
    ##(unless
-     ##(li "Stable version: " lookup-stable ", " ##(a #:href "eblook/" "eblook-1.3"))
+     ##(li "Stable version: " lookup-stable ", " ##(a #:href "/edict/eblook/" "eblook-1.3"))
      ##(li "Unstable version: " lookup-unstable)
      ##(li "Contribution: "
 	  ##(a #:href "http://www.aist-nara.ac.jp/~masata-y/autolookup/index.html" "Auto Lookup") ", "
