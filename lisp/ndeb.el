@@ -298,12 +298,14 @@
 
 (defun ndeb-process-open (directory appendix)
   (let* ((args (cons "-q" (cons directory (if appendix (list appendix)))))
-	 (buffer (lookup-open-process-buffer (concat " *ndeb+" directory "*")))
+	 (buffer
+	  (let ((lookup-enable-debug t))
+	    (lookup-open-process-buffer (concat " *ndeb+" directory "*"))))
 	 (process-connection-type nil)
 	 (process (apply 'start-process "ndeb" buffer ndeb-program-name args)))
     (process-kill-without-query process)
     (accept-process-output process)
-    (with-current-buffer (or buffer (lookup-temp-buffer))
+    (with-current-buffer buffer
       (save-excursion
 	(goto-char (point-min))
 	(if (search-forward "Warning: invalid book directory" nil t)
@@ -311,6 +313,9 @@
 	(goto-char (point-min))
 	(if (search-forward "Warning: invalid appendix directory" nil t)
 	    (error "Invalid appendix directory: %s" appendix))))
+    (unless lookup-enable-debug
+      (set-process-buffer process nil)
+      (kill-buffer buffer))
     process))
 
 (put 'ndeb-process-require 'lisp-indent-function 1)
