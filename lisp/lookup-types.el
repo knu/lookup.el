@@ -153,7 +153,7 @@
 			     (select
 			      (consp selected))
 			     (unselect
-			      (consp unselected))
+			      (not (consp unselected)))
 			     ((memq :priority spec)
 			      (plist-get spec :priority))
 			     (t
