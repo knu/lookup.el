@@ -35,7 +35,7 @@
   :type 'string
   :group 'lookup-kanji)
 
-(defcustom lookup-kanji-option '("-JH" "-p")
+(defcustom lookup-kanji-option '("-JH" "-p" "-u")
   "*漢字ひらがな変換プログラム(KAKASI)のオプション"
   :type 'list
   :group 'lookup-kanji)
@@ -65,12 +65,13 @@
   (unless (and (processp lookup-kanji-process)
 	       (eq (process-status lookup-kanji-process) 'run))
     (lookup-with-coding-system lookup-kanji-coding-system
-      (setq lookup-kanji-process
-	    (apply 'start-process
-		   "lookup-kanji"
-		   (lookup-kanji-generate-buffer)
-		   lookup-kanji-command
-		   lookup-kanji-option)))
+      (let ((process-connection-type nil))
+	(setq lookup-kanji-process
+	      (apply 'start-process
+		     "lookup-kanji"
+		     (lookup-kanji-generate-buffer)
+		     lookup-kanji-command
+		     lookup-kanji-option))))
     (sit-for 0.1)
     (process-kill-without-query lookup-kanji-process))
   lookup-kanji-process)
