@@ -383,18 +383,20 @@
      ((eq gaiji 'no-gaiji) nil)
      (t
       (let ((spec gaiji) glyph)
-	(unless spec
-	  (setq spec (lookup-dictionary-command dictionary :gaiji code)))
+;;;	(unless spec
+;;;	  (setq spec (lookup-dictionary-command dictionary :gaiji code)))
 ;;;	(when (vectorp spec)
 ;;;	  (setq spec (lookup-gaiji-concrete spec)))
-	(if (or (not spec)
-		(equal spec '(nil)))
-	    (setq gaiji 'no-gaiji)
-	  (if (stringp spec)
-	      (setq gaiji (lookup-new-gaiji spec))
-	    (setq glyph (or (car spec)
-			    (lookup-dictionary-command dictionary :font code)))
-	    (setq gaiji (lookup-new-gaiji glyph (cadr spec)))))
+;;;	(if (or (not spec)
+;;;		(equal spec '(nil)))
+;;;	    (setq gaiji 'no-gaiji)
+	(if (stringp spec)
+	    (setq gaiji (lookup-new-gaiji spec))
+	  (setq glyph (or (car spec)
+			  (lookup-dictionary-command dictionary :font code)))
+	  (if glyph
+	      (setq gaiji (lookup-new-gaiji glyph (cadr spec)))
+	    (setq gaiji 'no-gaiji)))
 	(lookup-gaiji-table-set table code gaiji)
 	(unless (eq gaiji 'no-gaiji) gaiji))))))
 

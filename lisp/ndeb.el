@@ -273,10 +273,6 @@
 	(offset (lookup-get-property entry 'ndeb-offset)))
     (ndeb-dictionary-search (lookup-entry-dictionary entry) query offset)))
 
-(put 'ndeb :gaiji 'ndeb-dictionary-gaiji)
-(defun ndeb-dictionary-gaiji (dictionary code)
-  (list (ndeb-dictionary-font dictionary code)))
-
 (put 'ndeb :font 'ndeb-dictionary-font)
 (defun ndeb-dictionary-font (dictionary code)
   (ndeb-with-dictionary dictionary
