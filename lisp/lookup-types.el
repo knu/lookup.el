@@ -522,11 +522,12 @@
 	(regexp (lookup-dictionary-gaiji-regexp
 		 (lookup-entry-dictionary entry))))
     (if (and regexp (string-match regexp heading))
-	(with-temp-buffer
-	  (insert heading)
-	  (goto-char (point-min))
-	  (lookup-arrange-gaijis entry)
-	  (setq heading (buffer-string))))
+	(save-excursion
+	  (with-temp-buffer
+	    (insert heading)
+	    (goto-char (point-min))
+	    (lookup-arrange-gaijis entry)
+	    (setq heading (buffer-string)))))
     (cond ((eq type 'slink) (setq heading (concat "-> " heading)))
 	  ((eq type 'dynamic) (setq heading (concat "-> [" heading "]"))))
     (lookup-put-property entry 'heading heading)))
