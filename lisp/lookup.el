@@ -27,7 +27,7 @@
 (require 'lookup-vars)
 (require 'lookup-types)
 
-(defconst lookup-version "1.99.2k"
+(defconst lookup-version "1.99.1"
   "The version numbers of Lookup.")
 
 
@@ -70,24 +70,6 @@ This can be used when you cannot finish Emacs because of an error of Lookup."
 	     "Lookup debug disabled")))
 
 
-;;;;;;;;;;;;;;;;;;;;
-;; Internal Functions
-;;;;;;;;;;;;;;;;;;;;
-
-(defvar lookup-message nil)
-
-(put 'lookup-with-message 'lisp-indent-function 1)
-(defmacro lookup-with-message (msg &rest body)
-  `(let ((lookup-message ,msg))
-     (message "%s..." lookup-message)
-     (prog1 (progn ,@body)
-       (message "%s...done" lookup-message))))
-
-(defun lookup-message (msg)
-  (message "%s... (%s)" lookup-message msg))
-
-
-
 ;;;
 ;;; Global commands
 ;;;
@@ -96,10 +78,10 @@ This can be used when you cannot finish Emacs because of an error of Lookup."
 
 (unless lookup-global-map
   (setq lookup-global-map (make-sparse-keymap))
-  (define-key lookup-global-map "\C-\M-n" 'lookup-next-history)
-  (define-key lookup-global-map "\C-\M-p" 'lookup-previous-history)
-  (define-key lookup-global-map "\C-\M-f" 'lookup-forward-module)
-  (define-key lookup-global-map "\C-\M-b" 'lookup-backward-module)
+  (define-key lookup-global-map "\en" 'lookup-next-history)
+  (define-key lookup-global-map "\ep" 'lookup-previous-history)
+  (define-key lookup-global-map "\ef" 'lookup-forward-module)
+  (define-key lookup-global-map "\eb" 'lookup-backward-module)
   (define-key lookup-global-map "B" 'lookup-list-bookmarks)
   (define-key lookup-global-map "H" 'lookup-list-history)
   (define-key lookup-global-map "f" 'lookup-find-pattern)
@@ -182,12 +164,14 @@ This can be used when you cannot finish Emacs because of an error of Lookup."
 
 (defun lookup-suspend ()
   "Close all Lookup windows temporary.
-Type `\\[lookup]' to back to Lookup."
+The last states of windows will be recovered if the varialbe
+`lookup-save-configuration' is non-nil.  Type `\\[lookup]'
+to back to Lookup."
   (interactive)
   (if (lookup-exclusive-frame-p)
       (delete-frame)
     (mapc 'lookup-hide-buffer lookup-buffer-list)
-    (when lookup-window-configuration
+    (when (and lookup-save-configuration lookup-window-configuration)
       (set-window-configuration lookup-window-configuration)
       (setq lookup-window-configuration nil))))
 
@@ -658,7 +642,7 @@ See `lookup-secondary' for details."
 
 (defun lookup-current-module ()
   (let ((session (lookup-current-session)))
-    (if session (lookup-session-module session) (lookup-default-module))))
+    (if session (lookup-session-module session))))
 
 (defun lookup-default-module ()
   (let ((name (or (lookup-assq-get lookup-mode-module-alist major-mode)
@@ -747,8 +731,7 @@ See `lookup-secondary' for details."
 	(set-window-buffer (select-window lookup-main-window) buffer)
 	(raise-frame (window-frame lookup-main-window)))
     (setq lookup-start-window (selected-window))
-    (if (> (length (window-list)) 1)
-	(setq lookup-window-configuration (current-window-configuration)))
+    (setq lookup-window-configuration (current-window-configuration))
     (funcall lookup-open-function buffer)
     (setq lookup-main-window (get-buffer-window buffer t)))
   (when (window-live-p lookup-sub-window)
@@ -799,6 +782,23 @@ See `lookup-secondary' for details."
 
 (defun lookup-exclusive-frame-p ()
   (string= (frame-parameter (selected-frame) 'name) "Lookup"))
+
+
+;;;;;;;;;;;;;;;;;;;;
+;; Internal Functions
+;;;;;;;;;;;;;;;;;;;;
+
+(defvar lookup-message nil)
+
+(put 'lookup-with-message 'lisp-indent-function 1)
+(defmacro lookup-with-message (msg &rest body)
+  `(let ((lookup-message ,msg))
+     (message "%s..." lookup-message)
+     (prog1 (progn ,@body)
+       (message "%s...done" lookup-message))))
+
+(defun lookup-message (msg)
+  (message "%s... (%s)" lookup-message msg))
 
 
 ;;;;;;;;;;;;;;;;;;;;
