@@ -914,10 +914,10 @@
 			     '(stem:step1 stem:step2 stem:step3 stem:step4 stem:step5))))
 		       'string<))))))
 
-
-(defun stem-english (str) "\
-活用語尾を取り除く関数
-与えられた語の元の語として可能性のある語の文字列長の昇順のリストを返す"
+;;;###autoload
+(defun stem-english (str)
+;;  "活用語尾を取り除く関数
+;; 与えられた語の元の語として可能性のある語の文字列長の昇順のリストを返す"
   (sort (stem:stripping-suffix str)
 	(function (lambda (a b) (< (length a) (length b))))))
 
