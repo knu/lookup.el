@@ -20,6 +20,17 @@
 ;; along with Lookup; if not, write to the Free Software Foundation,
 ;; Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+;;
+;; 使い方
+;;
+;; (setq lookup-search-agents
+;;      '((daijisen "/cdrom")))
+;;
+;; のように(daijisen "/cdrom")を追加するだけ。
+;; ひらがなかアルファベットでしか検索できないので、kakasi必須です。
+;; 今のところ、メニューの対応の方策のめどはたっていません。
+;;
+
 ;;; Code:
 
 (require 'lookup)
@@ -54,7 +65,8 @@
 ;;;
 
 (put 'daijisen :methods '(exact prefix suffix))
-(put 'daijisen :reference-pattern '("[⇔⇒→]\\([ーぁ-んァ-ヶ亜-熙]+\\)" 0 1 lookup-dynamic-search))
+(put 'daijisen :reference-pattern
+     '("[⇔⇒→]\\([ーぁ-んァ-ヶ亜-龠]+\\)" 0 1 lookup-dynamic-search))
 
 
 ;;;
