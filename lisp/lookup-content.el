@@ -48,6 +48,7 @@
   (define-key lookup-content-mode-map "<" 'beginning-of-buffer)
   (define-key lookup-content-mode-map ">" 'end-of-buffer)
   (define-key lookup-content-mode-map "\C-i" 'lookup-content-next-link)
+  (define-key lookup-content-mode-map "\C-\M-i" 'lookup-content-previous-link)
   (define-key lookup-content-mode-map "\C-m" 'lookup-content-follow-link)
   (define-key lookup-content-mode-map "t" 'lookup-content-toggle-format)
   (define-key lookup-content-mode-map "w" 'lookup-content-cite-region)
@@ -96,6 +97,18 @@
 	(error "No more link in this buffer")
       (goto-char (point-min))
       (if (lookup-goto-next-link)
+	  (message (lookup-entry-id (lookup-get-link (point))))
+	(error "No link in this buffer")))))
+
+(defun lookup-content-previous-link ()
+  "前のリンクに移動する。"
+  (interactive)
+  (if (lookup-goto-previous-link)
+      (message (lookup-entry-id (lookup-get-link (point))))
+    (if (lookup-get-link (point))
+	(error "No more link in this buffer")
+      (goto-char (point-max))
+      (if (lookup-goto-previous-link)
 	  (message (lookup-entry-id (lookup-get-link (point))))
 	(error "No link in this buffer")))))
 
