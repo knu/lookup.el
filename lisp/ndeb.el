@@ -247,6 +247,12 @@
 		nil
 	      (setq result-list (cons result result-list)
 		    entries (cons (ndeb-new-entry 'regular code heading) entries))))
+	  (when (re-search-forward "<more point=\\([0-9]*\\)>" nil t)
+	    (setq entry (ndeb-new-entry 'dynamic "more"))
+	    (lookup-put-property entry 'ndeb-query query)
+	    (lookup-put-property entry 'ndeb-offset
+				 (string-to-int (match-string 1)))
+	    (setq entries (cons entry entries)))
 	  (nreverse entries))))))
 	      
 
