@@ -42,8 +42,11 @@
 (defun lookup-select-build-buffer (module)
   (let ((inhibit-read-only t))
     (erase-buffer)
-    (insert "Tyep `m' to select, `u' to unselect, `q' to leave, "
-	    "`?' for help.\n\n")
+    (insert "Type `m' to select, `u' to unselect, `q' to leave, "
+	    "`?' for help.\n")
+    (insert "This module : " (lookup-module-name module)
+	    " / Current module : " (lookup-module-name (lookup-current-module))
+	    "\n")
     (lookup-table-insert
      "%c %-15t %-18t %s\n"
      (append
@@ -132,8 +135,8 @@ Search Methods:
   (kill-all-local-variables)
   (setq major-mode 'lookup-select-mode)
   (setq mode-name "Select")
-  (setq mode-line-buffer-identification
-	'("Lookup:%12b <" (lookup-module-name (lookup-current-module)) ">"))
+;  (setq mode-line-buffer-identification
+;	(list "Lookup:%12b <" (lookup-module-name (lookup-current-module)) ">"))
   (setq lookup-help-message lookup-select-mode-help)
   (setq buffer-read-only t)
   (setq truncate-lines t)
