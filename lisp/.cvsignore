@@ -1,5 +1,4 @@
 Makefile
 Makefile.in
-elisp-comp
-Attic
+lookup-vars.el
 lookup-autoloads.el
