@@ -86,7 +86,7 @@
 
 (html
  (table
-  (tr #:valign "botton"
+  (tr #:valign "bottom"
    (td (img "/lookup/images/title.png" #:alt "Lookup"))
    (td "Language:"
        (href "English" "http://lookup.sourceforge.net/")
