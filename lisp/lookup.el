@@ -391,7 +391,7 @@ See `lookup-secondary' for details."
 (defun lookup-input-pattern ()
   (let ((default (lookup-current-word)))
     (if (string-equal default "") (setq default nil))
-    (lookup-read-string "Look up" nil 'lookup-input-history default t)))
+    (lookup-read-string "Look up" nil 'lookup-input-history default)))
 
 (defun lookup-input-module ()
   (let ((table (mapcar (lambda (module) (list (lookup-module-name module) module))
