@@ -923,13 +923,12 @@ See `lookup-secondary' for details."
 
 (defun lookup-init-support-autoload ()
   (load "support-loaddef")
-  (dolist (pair lookup-support-autoload-alist)
-    (dolist (dict lookup-dictionary-list)
-      (when (string-match (car pair) (lookup-dictionary-id dict))
-	(lookup-assoc-set 'lookup-support-alist
-			  (lookup-dictionary-id dict)
-			  (cdr pair))
-	(return)))))
+  (dolist (dict (mapcar 'lookup-dictionary-id lookup-dictionary-list))
+    (unless (assoc dict lookup-support-alist)
+      (dolist (pair lookup-support-autoload-alist)
+	(when (string-match (car pair) dict)
+	  (lookup-use-support dict (cdr pair))
+	  (return))))))
 
 (defun lookup-clear ()
   (remove-hook 'kill-emacs-hook 'lookup-exit))
