@@ -1,5 +1,4 @@
-(set! %load-path (cons "../.." %load-path))
-(use-modules (htmlgen))
+(load "../header.scm")
 
 (define name "Howto")
 (define subtitle "Lookup Howto")

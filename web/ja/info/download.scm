@@ -1,5 +1,4 @@
-(set! %load-path (cons "../.." %load-path))
-(use-modules (htmlgen))
+(load "../header.scm")
 
 (define name "Download Sites")
 (define subtitle "ダウンロードサイト一覧")

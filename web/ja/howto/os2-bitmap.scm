@@ -1,5 +1,4 @@
-(set! %load-path (cons "../.." %load-path))
-(use-modules (htmlgen))
+(load "../header.scm")
 
 (define name "OS/2 Bitmap")
 (define subtitle "OS/2 で bitmap-muleのフォントを使う方法")
