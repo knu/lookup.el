@@ -34,7 +34,6 @@
 
 (defconst ndtp-process-coding-system 'euc-jp)
 
-
 ;;;
 ;;; types
 ;;;
@@ -220,36 +219,21 @@
    ((string-match "gaiji:\\([0-9a-z]+\\)" code)
     (list (ndtp-dictionary-font dictionary code)))
    ((string-match "&u:\\([0-9a-f]+\\)" code)
-    (vector 'ucs (string-to-int (match-string 1 code) 16)))
-   ((string-match "&j2:\\([0-9][0-9]\\)\\([0-9][0-9]\\)" code)
-    (vector 'japanese-jisx0212 
-            (+ 32 (string-to-int (match-string 1 code)))
-            (+ 32 (string-to-int (match-string 2 code)))))
-   ((string-match "&j3:\\([0-9][0-9]\\)\\([0-9][0-9]\\)" code)
-    (vector 'japanese-jisx0213-1
-            (+ 32 (string-to-int (match-string 1 code)))
-            (+ 32 (string-to-int (match-string 2 code)))))
-   ((string-match "&j4:\\([0-9][0-9]\\)\\([0-9][0-9]\\)" code)
-    (vector 'japanese-jisx0213-2
-            (+ 32 (string-to-int (match-string 1 code)))
-            (+ 32 (string-to-int (match-string 2 code)))))
-   ((string-match "&g0:\\(ffff\\)?\\([0-9][0-9]\\)\\([0-9][0-9]\\)" code)
-    (vector 'chinese-gb2312 
-            (+ 32 (string-to-int (match-string 1 code)))
-            (+ 32 (string-to-int (match-string 2 code)))))
-   ((string-match 
-     "&c\\([0-7]\\):\\([0-9a-fA-F][0-9a-fA-F]\\)\\([0-9a-fA-F][0-9a-fA-F]\\)"
-     code)
-    (vector (intern (concat "chinese-cns11643-" (match-string 1 code)))
-	    (string-to-int (match-string 2 code) 16)
-	    (string-to-int (match-string 3 code) 16)))))
+    (vector 'unicode (string-to-int (match-string 1 code) 16)))
+   ((string-match "&j2:\\([0-9]+\\)" code)
+    (vector 'jisx0212 (string-to-int (match-string 1 code))))
+   ((string-match "&g0:\\([0-9]+\\)" code)
+    (vector 'gb2312 (string-to-int (match-string 1 code))))
+   ((string-match "&c\\([0-7]\\):\\([0-9a-f]+\\)" code)
+    (vector (intern (concat "cns" (match-string 1 code)))
+	    (string-to-int (match-string 2 code) 16)))))
 
 (put 'ndtp :font 'ndtp-dictionary-font)
 (defun ndtp-dictionary-font (dictionary code)
   (string-match "gaiji:\\([0-9a-z]+\\)" code)
   (setq code (match-string 1 code))
   (let ((buffer (lookup-get-property dictionary 'ndtp-gaiji)))
-    (when buffer
+    (when (bufferp buffer)
       (with-current-buffer buffer
 	(goto-char (point-min))
 	(if (re-search-forward (format "^$=%s$" code) nil t)
@@ -274,7 +258,7 @@
    lookup-enable-gaiji
    (ndtp-process-require "XL16" "^$.\n")
    (let ((buffer (lookup-get-property dictionary 'ndtp-gaiji)))
-     (unless buffer
+     (when (null buffer)
        (if (not (string-match "16" (ndtp-process-require "XI" "^$[$N?]\n")))
 	   (setq buffer 'disable)
 	 (setq buffer (generate-new-buffer
@@ -282,7 +266,9 @@
 			       (lookup-dictionary-id dictionary))))
 	 (ndtp-process-require "XL16" "^$.\n")
 	 (with-current-buffer buffer
-	   (insert (ndtp-process-require "XB" "^$$\n"))))
+	   (insert (ndtp-process-require "XB" "^$[$<]\n")))
+	 (if (eq 0 (buffer-size buffer))
+	     (setq buffer 'disable)))
        (lookup-put-property dictionary 'ndtp-gaiji buffer)))))
 
 ;;;
