@@ -35,6 +35,7 @@
 (defvar lookup-module-attributes nil)
 (defvar lookup-dictionary-attributes nil)
 (defvar lookup-entry-attributes nil)
+(defvar lookup-cache-bookmarks nil)
 
 
 ;;;
