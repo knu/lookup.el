@@ -183,9 +183,7 @@ Dictionary option `cite-prefix' overrides this variable."
   :group 'lookup-additional-features)
 
 (defcustom lookup-use-kakasi
-  (if (let ((load-path exec-path))
-	(or (locate-library lookup-kakasi-program t)
-	    (locate-library (concat lookup-kakasi-program ".exe") t))) t)
+  nil
   "*Non-nil enables Kanji extraction by using KAKASI."
   :type 'boolean
   :group 'lookup-additional-features)
