@@ -37,7 +37,7 @@
  (cond
   ((memq 'xbm image-types) ;; emacs21
    (put 'ndeb :arrange-table '((image . ndeb-expand-images))))
-  ((featurep 'xemacs)
+  ((xemacs-p)
    (put 'ndeb :adjust-table '((image . ndeb-expand-images))))))
 
 (defun ndeb-expand-mono-images (entry)
