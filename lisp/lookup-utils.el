@@ -123,11 +123,83 @@
     (setq string (replace-match " " t t string)))
   string)
 
-(defun lookup-read-string (prompt &optional init history default inherit)
-  (read-string (if default
-		   (concat prompt " (default " default "): ")
-		 (concat prompt ": "))
-	       init history default inherit))
+(cond
+ ((featurep 'xemacs)
+  (defun lookup-backward-char ()
+    "カーソルがミニバッファの先頭にあるときは、検索対象のデフォルトを挿入する。
+それ以外の場合は1文字削除"
+    (interactive)
+    (if (eq 0 (length (buffer-substring)))
+	(insert lookup-read-string-default)
+      (backward-delete-char 1)))
+
+  (defun lookup-read-string (prompt &optional init history default inherit)
+    "`read-string' に似ているが、オプション DEFAULT が指定されば場合、
+プロンプトにその値を (defaut DEFAULT) のように表示する。PROMPT には
+自動的に \": \" が付加される。"
+    (let ((lookup-read-string-default default))
+      (cond
+       ((equal ""
+	       (setq result
+		     (read-from-minibuffer 
+		      (if default
+			  (concat prompt " (default " default "): ")
+			(concat prompt ": "))
+		      init
+		      (let ((now-map (copy-keymap minibuffer-local-map)))
+			(define-key now-map  "\C-?" 'lookup-backward-char)
+			(define-key now-map  "\C-h" 'lookup-backward-char)
+			(if (fboundp 'next-history-element)
+			    (define-key now-map  "\C-n" 'next-history-element))
+			(if (fboundp 'previous-history-element)
+			    (define-key now-map  "\C-p" 'previous-history-element))
+			now-map)
+		      nil history default)))
+	default)
+       (result)))))
+  (t
+   (cond
+    ((fboundp 'minibuffer-contents) ; emacs21
+     (defun lookup-backward-char ()
+       "カーソルがミニバッファの先頭にあるときは、検索対象のデフォルトを挿入する。
+それ以外の場合は1文字削除"
+       (interactive)
+       (if (eq 0 (length (minibuffer-contents)))
+	   (insert minibuffer-default)
+	 (backward-delete-char 1))))
+    (t
+     (defun lookup-backward-char ()
+       "カーソルがミニバッファの先頭にあるときは、検索対象のデフォルトを挿入する。
+それ以外の場合は1文字削除"
+       (interactive)
+       (cond ((and (bolp) minibuffer-default (looking-at "^$"))
+	      (insert minibuffer-default))
+	     (t
+	      (backward-delete-char 1))))))
+   
+   (defun lookup-read-string (prompt &optional init history default inherit)
+     "`read-string' に似ているが、オプション DEFAULT が指定されば場合、
+プロンプトにその値を (defaut DEFAULT) のように表示する。PROMPT には
+自動的に \": \" が付加される。"
+     (cond
+      ((equal ""
+	      (setq result
+		    (read-from-minibuffer 
+		     (if default
+			 (concat prompt " (default " default "): ")
+		       (concat prompt ": "))
+		     init
+		     (let ((now-map (copy-keymap minibuffer-local-map)))
+		       (define-key now-map  "\C-?" 'lookup-backward-char)
+		       (define-key now-map  "\C-h" 'lookup-backward-char)
+		       (if (fboundp 'next-history-element)
+			   (define-key now-map  "\C-n" 'next-history-element))
+		       (if (fboundp 'previous-history-element)
+			   (define-key now-map  "\C-p" 'previous-history-element))
+		       now-map)
+		     nil history default inherit)))
+       default)
+      (result)))))
 
 (put 'lookup-with-coding-system 'lisp-indent-function 1)
 (defmacro lookup-with-coding-system (coding &rest body)
@@ -291,38 +363,30 @@
   lookup-process-output-value)
 
 (defun lookup-process-filter (process string)
-  (with-current-buffer (process-buffer process)
-    (insert string)
-    (forward-line (- lookup-process-output-separator-lines))
-    (if (< (point) lookup-process-output-start)
-	(goto-char lookup-process-output-start))
-    (when (re-search-forward lookup-process-output-separator nil 0)
-      (goto-char (match-beginning 0))
-      (if lookup-process-output-filter
-	  (save-current-buffer
-	    (narrow-to-region lookup-process-output-start (point))
-	    (goto-char (point-min))
-	    (setq lookup-process-output-value
-		  (funcall lookup-process-output-filter process))
-	    (widen))
-	(setq lookup-process-output-value
-	      (buffer-substring lookup-process-output-start (point))))
-      (setq lookup-process-output-finished t))))
+  (when (process-buffer process)
+    (with-current-buffer (process-buffer process)
+      (insert string)
+      (forward-line (- lookup-process-output-separator-lines))
+      (if (< (point) lookup-process-output-start)
+	  (goto-char lookup-process-output-start))
+      (when (re-search-forward lookup-process-output-separator nil 0)
+	(goto-char (match-beginning 0))
+	(if lookup-process-output-filter
+	    (save-current-buffer
+	      (narrow-to-region lookup-process-output-start (point))
+	      (goto-char (point-min))
+	      (setq lookup-process-output-value
+		    (funcall lookup-process-output-filter process))
+	      (widen))
+	  (setq lookup-process-output-value
+		(buffer-substring lookup-process-output-start (point))))
+	(setq lookup-process-output-finished t)))))
 
 (defun lookup-process-kill (process)
   (set-process-filter process nil)
   (delete-process process)
   (if (process-buffer process)
       (kill-buffer (process-buffer process))))
-
-;; UCS character processing
-
-(defun lookup-ucs-char (ucs)
-  (if (functionp 'ucs-to-char)
-      (ucs-to-char ucs)
-    (if (functionp 'ucs-char)
-        (ucs-char ucs)
-      (decode-char 'ucs ucs))))
 
 (provide 'lookup-utils)
 
