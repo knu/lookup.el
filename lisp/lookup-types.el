@@ -241,7 +241,7 @@
  			     (select
  			      (consp selected))
  			     (unselect
- 			      (consp unselected))
+ 			      (not (consp unselected)))
  			     ((memq ':priority spec)
  			      (plist-get spec ':priority))
  			     (t
@@ -521,7 +521,8 @@ internal caches."
 	  (setq spec (lookup-dictionary-command dictionary ':gaiji code)))
 	(when (vectorp spec)
 	  (setq spec (lookup-gaiji-concrete spec)))
-	(if (not spec)
+	(if (or (not spec)
+		(equal spec '(nil)))
 	    (setq gaiji 'no-gaiji)
 	  (if (stringp spec)
 	      (setq gaiji (lookup-new-gaiji spec))
@@ -725,7 +726,7 @@ Return 0 if HISTORY has never been used."
 (lookup-defstruct gaiji (glyph alter))
 
 (cond
- ((featurep 'xemacs)
+ ((xemacs-p)
   (defun lookup-new-gaiji (glyph &optional alter)
     (unless
 	(and (stringp glyph)
