@@ -316,7 +316,15 @@
 
 (provide 'ndeb)
 
-(if ndeb-use-inline-image
-    (require 'ndeb-image))
+
+(defvar image-types nil)
+
+(and
+ ndeb-use-inline-image
+ window-system
+ (or
+  (featurep 'xemacs)
+  (memq 'xbm image-types))
+ (require 'ndeb-image))
 
 ;;; ndeb.el ends here
