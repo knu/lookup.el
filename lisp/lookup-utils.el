@@ -123,6 +123,16 @@
     (setq string (replace-match " " t t string)))
   string)
 
+;; xemacs
+
+(cond
+ ((featurep 'xemacs)
+  (defmacro xemacs-p () t))
+ (t
+  (defmacro xemacs-p () nil)))
+
+;; lookup-read-string
+
 (defvar lookup-read-string-map (copy-keymap minibuffer-local-map))
 (define-key lookup-read-string-map "\C-?" 'lookup-backward-char)
 (define-key lookup-read-string-map "\C-h" 'lookup-backward-char)
@@ -142,7 +152,7 @@
 		 init history default)))
 
 (cond
- ((featurep 'xemacs)
+ ((xemacs-p)
   (defun lookup-backward-char ()
     "カーソルがミニバッファの先頭にあるときは、検索対象のデフォルトを挿入する。
 それ以外の場合は1文字削除"
