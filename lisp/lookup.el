@@ -26,6 +26,9 @@
 (require 'lookup-utils)
 (require 'lookup-vars)
 (require 'lookup-types)
+(or
+ (fboundp 'overlay-lists)
+ (require 'overlay))
 
 (defconst lookup-version "1.99.1"
   "The version numbers of Lookup.")
@@ -215,15 +218,16 @@ Otherwise, this is the same with \\[lookup-previous-history]."
 
 (defun lookup-help ()
   (interactive)
+  (let ((help-message lookup-help-message))
   (with-current-buffer (lookup-get-buffer "*Lookup Help*")
     (help-mode)
     (let ((inhibit-read-only t))
       (erase-buffer)
-      (insert lookup-help-message))
+		(insert help-message))
     (goto-char (point-min))
     (if (window-live-p lookup-start-window)
 	(set-window-buffer lookup-start-window (current-buffer))
-      (display-buffer (current-buffer)))))
+		(display-buffer (current-buffer))))))
 
 
 ;;;
@@ -462,14 +466,14 @@ See `lookup-secondary' for details."
     (lookup-format-internal entry funcs "formatting")))
 
 (defun lookup-adjust-content (entry)
-  (let ((funcs '(lookup-adjust-show-gaijis
-		 lookup-adjust-hide-examples
-		 lookup-adjust-check-references)))
-    (if (featurep 'xemacs)
-	(mapcar-extents 'delete-extent)
-      (let ((overlay (overlay-lists)))
-	(mapc 'delete-overlay (car overlay))
-	(mapc 'delete-overlay (cdr overlay))))
+  (let ((funcs (lookup-dictionary-adjusts (lookup-entry-dictionary entry))))
+    (when (featurep 'xemacs) ;; remove gaiji-glyph definition
+      (mapcar-extents
+       '(lambda (foo)
+	  (set-extent-begin-glyph foo nil))))
+    (let ((overlay (overlay-lists)))
+      (mapc 'delete-overlay (car overlay))
+      (mapc 'delete-overlay (cdr overlay)))
     (lookup-format-internal entry funcs nil)
     (goto-char (point-min))))
 
@@ -500,15 +504,14 @@ See `lookup-secondary' for details."
 (defun lookup-adjust-hide-examples (entry)
   (unless lookup-enable-example
     (lookup-map-over-property
-     (point-min) (point-max) 'face
+     (point-min) (point-max) 'example
      (lambda (start end face)
-       (when (eq face 'lookup-comment-face)
-	 (if (eq (char-after (1- start)) ?\n)
-	     (setq start (1- start)))
-	 (let ((overlay (make-overlay start (1- end))))
-	   (overlay-put overlay 'invisible t)
-	   (overlay-put overlay 'evaporate t)
-	   (overlay-put overlay 'before-string "...")))))))
+       (if (eq (char-after (1- start)) ?\n)
+	   (setq start (1- start)))
+       (let ((overlay (make-overlay start end)))
+	 (overlay-put overlay 'invisible t)
+	 (overlay-put overlay 'evaporate t)
+	 (overlay-put overlay 'before-string "..."))))))
 
 ;; reference
 
@@ -642,7 +645,9 @@ See `lookup-secondary' for details."
 
 (defun lookup-current-module ()
   (let ((session (lookup-current-session)))
-    (if session (lookup-session-module session))))
+        (if session (lookup-session-module session)
+            ;; satomii: is it okay to always return the car of the list?
+            (car lookup-module-list))))
 
 (defun lookup-default-module ()
   (let ((name (or (lookup-assq-get lookup-mode-module-alist major-mode)
@@ -780,8 +785,13 @@ See `lookup-secondary' for details."
 	(default-frame-alist (cons '(name . "Lookup") lookup-frame-alist)))
     (pop-to-buffer buffer)))
 
-(defun lookup-exclusive-frame-p ()
-  (string= (frame-parameter (selected-frame) 'name) "Lookup"))
+(cond
+ ((featurep 'xemacs)
+  (defun lookup-exclusive-frame-p ()
+    (string= (cdr (assoc 'name (frame-parameters (selected-frame)))) "Lookup")))
+ (t
+  (defun lookup-exclusive-frame-p ()
+    (string= (frame-parameter (selected-frame) 'name) "Lookup"))))
 
 
 ;;;;;;;;;;;;;;;;;;;;
