@@ -150,14 +150,14 @@
 ;; 外部プロセスの呼出し
 ;; 
 (defun srd-fpw-start-process (program options file &optional delete-file)
-  (message "Starting %s ..." program)
+  (message "Starting %s..." program)
   (let ((pro (apply (function start-process)
 		    (format "*srd-fpw %s*" program)
 		    nil
 		    "ssh"
 		    (append (list "kei" program)
 			    options (list (concat "/mnt/indy" file))))))
-    (message "Starting %s ... done" program)
+    (message "Starting %s...done" program)
     (set-process-sentinel pro 'srd-fpw-start-process-sentinel)
     (setq srd-fpw-process-file-alist 
 	  (cons (cons pro file) 

@@ -132,13 +132,13 @@
 ;; 外部プロセスの呼出し
 ;; 
 (defun mypaedia-start-process (program options file &optional delete-file)
-    (message "Starting %s ..." program)
+    (message "Starting %s..." program)
     (let ((pro (apply (function start-process)
 		      (format "*mypaedia %s*" program)
 		      nil
 		      program
 		      (append options (list file)))))
-      	(message "Starting %s ... done" program)
+      	(message "Starting %s...done" program)
 	(set-process-sentinel pro 'mypaedia-start-process-sentinel)
 	(setq mypaedia-process-file-alist 
 		(cons (cons pro file) 
@@ -181,10 +181,10 @@
 	      (delete-process "lookup-play-midi")
 	    (if (get-process "lookup-play-wav")
 		(delete-process "lookup-play-wav")))
-	  (message "Starting %s ..." mypaedia-play-midi-process)
+	  (message "Starting %s..." mypaedia-play-midi-process)
 	  (start-process "lookup-play-midi" nil
 			 mypaedia-play-midi-process midi-file)
-	  (message "Starting %s ... done" mypaedia-play-midi-process)))))
+	  (message "Starting %s...done" mypaedia-play-midi-process)))))
 
 (defun mypaedia-play-midi (pos)
   (mypaedia-play-midi-sub (get-text-property pos 'file)))
@@ -216,10 +216,10 @@
 	      (delete-process "lookup-play-midi")
 	    (if (get-process "lookup-play-wav")
 		(delete-process "lookup-play-wav")))
-	  (message "Starting %s ..." mypaedia-play-wav-process)
+	  (message "Starting %s..." mypaedia-play-wav-process)
 	  (start-process "lookup-play-wav" nil
 			 mypaedia-play-wav-process wav-file)
-	  (message "Starting %s ... done" mypaedia-play-wav-process)))))
+	  (message "Starting %s...done" mypaedia-play-wav-process)))))
 
 (defun mypaedia-play-wav (pos)
   (mypaedia-play-wav-sub (get-text-property pos 'file)))
@@ -249,10 +249,10 @@
 	    (or bulk (error "%s: not found." avi-file))
 	  (if (get-process "lookup-play-avi")
 	      (delete-process "lookup-play-avi"))
-	  (message "Starting %s ..." mypaedia-play-avi-process)
+	  (message "Starting %s..." mypaedia-play-avi-process)
 	  (start-process "lookup-play-avi" nil
 			 mypaedia-play-avi-process avi-file)
-	  (message "Starting %s ... done" mypaedia-play-avi-process)))))
+	  (message "Starting %s...done" mypaedia-play-avi-process)))))
 
 (defun mypaedia-play-avi (pos)
   (mypaedia-play-avi-sub (get-text-property pos 'file)))
