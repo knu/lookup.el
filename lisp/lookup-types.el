@@ -183,10 +183,11 @@
 					       ":" location)))
 	 (opts (lookup-assoc-get lookup-agent-option-alist
 				 (lookup-agent-id agent))))
-    (while options
-      (plist-put opts (caar options) (cdar options) )
-      (setq options (cdr options)))
-    (setf (lookup-agent-options agent) opts)
+    (if opts
+	(while options
+	  (plist-put opts (car options) (cadr options))
+	  (setq options (cddr options))))
+    (setf (lookup-agent-options agent) (or opts options))
     (if lookup-cache-file (lookup-restore-agent-attributes agent))
     agent))
 
@@ -208,6 +209,21 @@
 	(message "Setting up %s..." id)
 	(setq dicts (lookup-agent-command agent :list))
 	(message "Setting up %s...done" id)
+	;; Restrict dictionaries by the options `:enable' and `:disable'.
+	(let ((enable (or
+		       (lookup-agent-option agent  :enable)
+		       (lookup-agent-option agent ':enable)))
+	      (disable (or
+			(lookup-agent-option agent  :disable)
+			(lookup-agent-option agent ':disable))))
+	  (when (or enable disable)
+	    (setq dicts
+		  (lookup-grep
+		   (lambda (dict)
+		     (let ((name (lookup-dictionary-name dict)))
+		       (and (or (not enable) (member name enable))
+			    (not (member name disable)))))
+		   dicts))))
 	(lookup-put-property agent 'dictionaries dicts)
 	dicts)))
 
