@@ -18,12 +18,6 @@
 ;;; Code:
 
 (require 'lookup)
-
-;;
-;; $Id$
-;;
-
-(require 'lookup)
 (require 'decode-iso10646)
 (require 'gte)
 
