@@ -204,108 +204,83 @@
      ("za34f" . "⇔")
      ("za722" . "⇒"))))
 
-;; reference pattern
-
-(defconst chujiten-base-reference-regexp
-  (cond ((eq lookup-support-agent 'ndtp)
-	 "→<\\([0-9a-f:]+\\)>")
-	((eq lookup-support-agent 'ndeb)
-	 "<reference>→</reference=\\([0-9a-f:]+\\)>")))
-
-(defconst chujiten-eiwa-reference-pattern
-  (list (concat chujiten-base-reference-regexp "\\([a-zA-Z' ]*[０-９]*\\>\\)?")
-	'(concat "→" (match-string 2)) 2 1))
-
-(defconst chujiten-waei-reference-pattern
-  (list (concat chujiten-base-reference-regexp "\\([^ ,.\n]*\\)?")
-	'(concat "→" (match-string 2)) 2 1))
-
-(defun chujiten-reference-pattern (entry)
-  (cond
-   ((chujiten-eiwa-entry-p entry) chujiten-eiwa-reference-pattern)
-   ((chujiten-waei-entry-p entry) chujiten-waei-reference-pattern)
-   (t (lookup-dictionary-ref (lookup-entry-dictionary entry)
-			     ':reference-pattern))))
-
-;; arrange table
-
-(defconst chujiten-arrange-table
-  '((structure . chujiten-arrange-structure)))
-
-; (defconst chujiten-example-regexp
-;   (cond ((eq lookup-support-agent 'ndtp)
-; 	 "→<gaiji:za33a><\\([0-9a-f:]+\\)>")
-; 	((eq lookup-support-agent 'ndeb)
-; 	 "<reference>→<gaiji=za33a></reference=\\([0-9a-f:]+\\)>")))
-
-; (defun chujiten-arrange-expand-examples (entry)
-;   (setq entry (lookup-new-entry (lookup-entry-dictionary entry) nil ""))
-;   (while (re-search-forward chujiten-example-regexp nil t)
-;     (lookup-entry-set-code entry (match-string 1))
-;     (delete-region (match-beginning 0) (match-end 0))
-;     (forward-line)
-;     (narrow-to-region (point) (progn (insert (lookup-dictionary-command
-; 					      dictionary 'content entry))
-; 				     (point)))
-;     (goto-char (point-min))
-;     (while (not (eobp)) (insert "*") (forward-line))
-;     (widen)))
-
-(defconst chujiten-eiwa-structure-regexp
-  (concat "^\\(−\\[[^]\n]+\\]\\)\\|"		; level 2
-	  "^\\([A-Z]\\>\\)\\|"			; level 3
-	  "^\\([0-9]+\\)?\\([a-z]\\)?\\>\\|"	; level 4, 5
-	  "^\\(\\*.*\n\\)"))			; level 6
-
-(defun chujiten-eiwa-arrange-structure (entry)
-  ;; 見出し語を level 1
-  (when (looking-at "\\(([+*]+)\\)?\\([^/\n]*\\) *\\(/[^/\n]+/\\)?")
-    (lookup-make-region-heading (match-beginning 2) (match-end 2) 1))
-  (forward-line)
-  ;; level 2-6
-  (let ((case-fold-search nil) n)
-    (while (re-search-forward chujiten-eiwa-structure-regexp nil t)
-      (setq n 1)
-      (while (<= n 6)
-	(if (match-beginning n)
-	    (lookup-make-region-heading
-	     (match-beginning n) (match-end n) (1+ n)))
-	(setq n (1+ n))))))
-
-(defun chujiten-waei-arrange-structure (entry)
-  (lookup-make-region-heading (point) (progn (end-of-line) (point)) 1)
-  (forward-line)
-  (while (re-search-forward "^\\([0-9]+\\)\\|^\\(\\(【文例】\\)?\\*.*\n\\)" nil t)
-    (if (match-beginning 1)
-	(lookup-make-region-heading (match-beginning 1) (match-end 0) 4)
-      (lookup-make-region-heading (match-beginning 2) (match-end 2) 6))))
-
 (defun chujiten-arrange-structure (entry)
-  (cond
-   ((chujiten-eiwa-entry-p entry) (chujiten-eiwa-arrange-structure entry))
-   ((chujiten-waei-entry-p entry) (chujiten-waei-arrange-structure entry))
-   (t (lookup-arrange-structure entry))))
+  (goto-char (point-min))
+  (while (re-search-forward "^[0-9]+" nil t)
+    (put-text-property (match-beginning 0)
+		       (match-end 0)
+		       'face 'lookup-heading-1-face))
+  (goto-char (point-min))
+  (while (re-search-forward "^[ 0-9]+[a-z] " nil t)
+    (put-text-property (1+ (match-beginning 0))
+		       (match-end 0)
+		       'face 'lookup-heading-2-face))
+  (goto-char (point-min))
+  (let (start end)
+    (while (re-search-forward "^   " nil t)
+      (forward-line 0) ; like as (beginning-of-line)
+      (setq start (point))
+      (while (looking-at "^   ")
+	(forward-line 1))
+      (setq end (1- (point)))
+      (lookup-make-region-heading start end 6)
+      (put-text-property start end 'example t))))
 
-;; internal functions
+(defun chujiten-expand-example (entry)
+  (while (re-search-forward "^\\([a-z] \\)" nil t)
+    (replace-match (concat " " (match-string 1))))
+  (goto-char (point-min))
+  (let ((dic (lookup-entry-dictionary entry)))
+    (while (re-search-forward
+	    "^<reference>→</reference=\\([^>\n]*\\)>\\(.*\\)\n" nil t)
+      (let* ((heading (match-string 2))
+	     (example (match-string 1)))
+	(delete-region (match-beginning 0) (match-end 0))
+	(save-excursion
+	  (save-restriction
+	    (narrow-to-region (point) (point))
+	    (let ((entry (lookup-new-entry 'example dic example heading)))
+	      (insert "→"  (lookup-entry-command entry ':content)))
+	    (goto-char (point-min))
+	    (forward-line)
+;	    (string-rectangle (point) (point-max) chujiten-example-heading)
+	    (indent-region (point) (point-max) 3)
+	    ))))
 
-(defun chujiten-eiwa-entry-p (entry)
-  (let ((code (lookup-entry-code entry)))
-    (and (string< "17a2" code) (string< code "6e8d"))))
+    (goto-char (point-min))
+    (while (re-search-forward
+	    "<reference>→<gaiji=za33a></reference=\\([^>\n]*\\)>\n" nil t)
+      (let ((example (match-string 1)))
+	(save-excursion
+	  (save-restriction
+	    (narrow-to-region (match-beginning 0) (match-end 0))
+	    (delete-region (point-min) (point-max))
+	    (let ((entry (lookup-new-entry 'example dic example "")))
+	      (insert "\n" (lookup-entry-command entry ':content)))
+	    (goto-char (point-min))
+	    (forward-line)
+;	    (string-rectangle (point) (point-max) chujiten-example-heading)
+	    (indent-region (point) (point-max) 3)
+	    ))))
+    (goto-char (point-min)))
+  (lookup-arrange-replaces entry)
+  (goto-char (point-min))
+  (while
+      (replace-regexp
+       "\\(<reference>→\\)\\(</reference=[^>\n]*>\\)\\([A-Za-z \n]+\\)"
+       "\\1\\3\\2"))
+  )
 
-(defun chujiten-waei-entry-p (entry)
-  (let ((code (lookup-entry-code entry)))
-    (and (string< "6e8d" code) (string< code "a773"))))
 
-(defun chujiten-menu-entry-p (entry)
-  (let ((code (lookup-entry-code entry)))
-    (or (string< code "17a2") (string< "a773" code))))
-
-;; support options
 
 (setq lookup-support-options
-      (list ':gaiji-table chujiten-gaiji-table
-	    ':reference-pattern 'chujiten-reference-pattern
-	    ':arrange-table chujiten-arrange-table
+      (list
+	     ':gaiji-table chujiten-gaiji-table
+;	    ':reference-pattern 'chujiten-reference-pattern
+	    ':arrange-table '((replace   . chujiten-expand-example)
+			      (structure . chujiten-arrange-structure)
+;			      (structure . lookup-arrange-nofill)
+			      (fill . lookup-arrange-nofill))
 	    ':transformer 'lookup-stemming-search))
 
 ;;; chujiten.el ends here
