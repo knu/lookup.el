@@ -4,6 +4,7 @@ SOURCES = lookup.el lookup-utils.el lookup-types.el lookup-vars.el \
 	ndtut.el ndic.el ndeb.el ndtp.el ndict.el ndsrd.el ndkks.el \
 	ndspell.el ndcookie.el \
 	ndeb-image.el lookup-glyph.el \
+	ndeb-bitmap.el lookup-kanji.el \
 	support-loaddef.el support-chiezo.el support-foldoc.el \
 	support-oxford.el support-chujiten.el support-genius.el \
 	support-rfc1983.el support-colloc.el support-iwakoku.el \
