@@ -49,6 +49,7 @@
 ;;   2. Edit this file as you like.
 ;;   3. M-x lookup-restart")
 
+;;;###autoload
 (defun lookup-dump-cache (file)
   (let ((name (file-name-nondirectory file)))
     (with-temp-buffer
