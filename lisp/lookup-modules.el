@@ -125,7 +125,8 @@
   (interactive "sModule name: ")
   (if (lookup-get-module name)
       (error "Module `%s' already exists" name))
-  (let ((lookup-current-module (lookup-new-module name t)))
+  (progn
+    (setq lookup-current-module (lookup-new-module name t))
     (setq lookup-module-list
 	  (nconc lookup-module-list (list lookup-current-module)))
     (lookup-select-dictionaries lookup-current-module))
