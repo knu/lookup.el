@@ -64,7 +64,7 @@
 ;;;
 
 
-(defconst lookup-select-mode-help
+(defconst lookup-modules-mode-help
   "Lookup Select mode:
 
 `C-k'      - remove this module `C-xC-t' - transpose modules
@@ -120,6 +120,7 @@
 ;;; Interactive Commands
 ;;;
 
+;;;###autoload
 (defun lookup-modules-create-module (name)
   (interactive "sModule name: ")
   (if (lookup-get-module name)
