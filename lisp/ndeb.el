@@ -47,6 +47,8 @@
   :type 'symbol
   :group 'ndeb)
 
+(defvar ndeb-use-inline-image t)
+
 
 ;;;
 ;;; Internal varialbes
@@ -188,7 +190,7 @@
 
 (put 'ndeb :methods 'ndeb-dictionary-methods)
 (defun ndeb-dictionary-methods (dictionary)
-  (let* ((string (ndeb-dictionary-get-info dictionary "search methods"))
+  (let* ((string (or (ndeb-dictionary-get-info dictionary "search methods") ""))
 	 (methods (if (string-match "menu" string) '(menu))))
     (if (string-match "endword" string)
 	(setq methods (cons 'suffix methods)))
@@ -289,6 +291,7 @@
 (defun ndeb-process-open (directory appendix)
   (let* ((args (cons "-q" (cons directory (if appendix (list appendix)))))
 	 (buffer (lookup-open-process-buffer (concat " *ndeb+" directory "*")))
+	 (process-connection-type nil)
 	 (process (apply 'start-process "ndeb" buffer ndeb-program-name args)))
     (process-kill-without-query process)
     (accept-process-output process)
@@ -314,4 +317,6 @@
 
 (provide 'ndeb)
 
+(if ndeb-use-inline-image
+    (require 'ndeb-image))
 ;;; ndeb.el ends here
