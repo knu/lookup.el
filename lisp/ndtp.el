@@ -39,7 +39,7 @@
 ;;;
 
 (put 'ndtp :methods '(exact prefix suffix))
-(put 'ndtp :gaiji-regexp "<\\(\\(&..?\\|gaiji\\):[^>]*\\)>")
+(put 'ndtp :gaiji-regexp "<gaiji:\\([^>]*\\)>")
 (put 'ndtp :replace-alist '(("→□\\(#0001\\|<gaiji:z0001>\\)?" . "")))
 (put 'ndtp :reference-pattern
      '("\\(→\\(\\([^<\n]\\|<gaiji:[^>]*>\\)+\\)\\)?<\\([0-9a-f:]+\\)>"
@@ -213,25 +213,8 @@
 		(setq heading nil)))
 	    (nreverse entries)))))))
 
-(put 'ndtp :gaiji 'ndtp-dictionary-gaiji)
-(defun ndtp-dictionary-gaiji (dictionary code)
-  (cond
-   ((string-match "gaiji:\\([0-9a-z]+\\)" code)
-    (list (ndtp-dictionary-font dictionary code)))
-   ((string-match "&u:\\([0-9a-f]+\\)" code)
-    (vector 'unicode (string-to-int (match-string 1 code) 16)))
-   ((string-match "&j2:\\([0-9]+\\)" code)
-    (vector 'jisx0212 (string-to-int (match-string 1 code))))
-   ((string-match "&g0:\\([0-9]+\\)" code)
-    (vector 'gb2312 (string-to-int (match-string 1 code))))
-   ((string-match "&c\\([0-7]\\):\\([0-9a-f]+\\)" code)
-    (vector (intern (concat "cns" (match-string 1 code)))
-	    (string-to-int (match-string 2 code) 16)))))
-
 (put 'ndtp :font 'ndtp-dictionary-font)
 (defun ndtp-dictionary-font (dictionary code)
-  (string-match "gaiji:\\([0-9a-z]+\\)" code)
-  (setq code (match-string 1 code))
   (let ((buffer (lookup-get-property dictionary 'ndtp-gaiji)))
     (when (bufferp buffer)
       (with-current-buffer buffer
@@ -266,9 +249,9 @@
 			       (lookup-dictionary-id dictionary))))
 	 (ndtp-process-require "XL16" "^$.\n")
 	 (with-current-buffer buffer
-	   (insert (ndtp-process-require "XB" "^$[$<]\n")))
-	 (if (eq 0 (buffer-size buffer))
-	     (setq buffer 'disable)))
+	   (insert (ndtp-process-require "XB" "^$[$<]\n"))
+	   (if (eq 0 (buffer-size))
+	       (setq buffer 'disable))))
        (lookup-put-property dictionary 'ndtp-gaiji buffer)))))
 
 ;;;
