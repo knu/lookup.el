@@ -247,7 +247,6 @@
 `M'(enu)   - display the menu   `B'(ookmark) - display the bookmarks
 
 `f'(ind)
-`c'(ontinuous)
 
 `t f' - toggle format
 `t g' - toggle gaiji
@@ -278,7 +277,7 @@
   (define-key lookup-summary-mode-map "n" 'lookup-summary-next-entry)
   (define-key lookup-summary-mode-map "p" 'lookup-summary-previous-entry)
   (define-key lookup-summary-mode-map
-    (if (featurep 'xemacs) 'button2 [mouse-2]) 'lookup-summary-mouse-follow)
+    (if (xemacs-p) 'button2 [mouse-2]) 'lookup-summary-mouse-follow)
   ;; entry management
   (define-key lookup-summary-mode-map "i" 'lookup-summary-info)
   (define-key lookup-summary-mode-map "m" 'lookup-summary-mark)
@@ -306,6 +305,7 @@
   (define-key lookup-summary-mode-map "tv" 'lookup-summary-toggle-overview)
   ;; new session
   (define-key lookup-summary-mode-map "^" 'lookup-select-dictionary)
+  (define-key lookup-summary-mode-map "S" 'lookup-select-dictionary)
 ;  (define-key lookup-summary-mode-map "I" 'lookup-summary-show-index)
   (define-key lookup-summary-mode-map "L" 'lookup-summary-list-references)
   (define-key lookup-summary-mode-map "M" 'lookup-summary-dictionary-menu)
@@ -776,7 +776,7 @@ which indicates the number of the dictionary."
   (define-key lookup-content-mode-map "g" 'lookup-content-update)
   (define-key lookup-content-mode-map "q" 'lookup-content-leave)
   (define-key lookup-content-mode-map
-    (if (featurep 'xemacs) 'button2 [mouse-2]) 'lookup-content-mouse-follow)
+    (if (xemacs-p) 'button2 [mouse-2]) 'lookup-content-mouse-follow)
   )
 
 (defvar lookup-content-mode-hook nil)
