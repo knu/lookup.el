@@ -107,6 +107,7 @@ This can be used when you cannot finish Emacs because of an error of Lookup."
 (defun lookup-forward-module (arg)
   (interactive "p")
   (let ((module (lookup-nth-module arg (lookup-current-module))))
+    (setq lookup-current-module module)
     (if (eq major-mode 'lookup-select-mode)
 	(lookup-select-dictionaries module)
       (let ((query (lookup-session-query (lookup-current-session))))
@@ -186,7 +187,12 @@ to back to Lookup."
     (when (or (not (interactive-p))
 	      (y-or-n-p "Are you sure to exit Lookup? "))
       (lookup-with-message "Exitting Lookup"
-	(if lookup-cache-file (lookup-dump-cache lookup-cache-file))
+	(if lookup-cache-file
+	    (condition-case reason
+		(lookup-dump-cache lookup-cache-file)
+	      (error (progn
+		       (prin1 reason)
+		       (sit-for 1)))))
 	(lookup-suspend)
 	(mapc 'kill-buffer lookup-buffer-list)
 	(mapc 'lookup-agent-clear lookup-agent-list)
@@ -388,14 +394,14 @@ See `lookup-secondary' for details."
     (lookup-read-string "Look up" nil 'lookup-input-history default t)))
 
 (defun lookup-input-module ()
-  (let ((table (mapcar (lambda (module) (lookup-module-name module) module)
+  (let ((table (mapcar (lambda (module) (list (lookup-module-name module) module))
 		       lookup-module-list)))
     (lookup-get-module
      (completing-read "Search module: " table nil t nil
 		      'lookup-input-module-history))))
 
 (defun lookup-input-dictionary ()
-  (let ((table (mapcar (lambda (dict) (lookup-dictionary-id dict) dict)
+  (let ((table (mapcar (lambda (dict) (list (lookup-dictionary-id dict) dict))
 		       lookup-dictionary-list)))
     (lookup-get-dictionary
      (completing-read "Dictionary: " table nil t nil
@@ -643,11 +649,15 @@ See `lookup-secondary' for details."
 	  (with-current-buffer (window-buffer lookup-main-window)
 	    lookup-current-session))))
 
+(defvar lookup-current-module nil)
+
 (defun lookup-current-module ()
   (let ((session (lookup-current-session)))
-        (if session (lookup-session-module session)
-            ;; satomii: is it okay to always return the car of the list?
-            (car lookup-module-list))))
+    (cond
+     (session
+      (lookup-session-module session))
+     (lookup-current-module)
+     ((lookup-default-module)))))
 
 (defun lookup-default-module ()
   (let ((name (or (lookup-assq-get lookup-mode-module-alist major-mode)
@@ -655,10 +665,11 @@ See `lookup-secondary' for details."
     (if name
 	(or (lookup-get-module name)
 	    (error "No such module: %s" name))
-      (car lookup-module-list))))
+      (or lookup-current-module
+	  (car lookup-module-list)))))
 
-(defun lookup-get-module (id)
-  (car (member-if (lambda (module) (equal (lookup-module-id module) id))
+(defun lookup-get-module (name)
+  (car (member-if (lambda (module) (equal (lookup-module-name module) name))
 		  lookup-module-list)))
 
 (defun lookup-get-agent (id)
