@@ -181,6 +181,25 @@ non-nil を返したものだけを新たにリストとして生成する。
     (setq string (replace-match " " t t string)))
   string)
 
+
+(defvar lookup-read-string-map (copy-keymap minibuffer-local-map))
+(define-key lookup-read-string-map "\C-?" 'lookup-backward-char)
+(define-key lookup-read-string-map "\C-h" 'lookup-backward-char)
+(define-key lookup-read-string-map "\C-n" 'next-history-element)
+(define-key lookup-read-string-map "\C-p" 'previous-history-element)
+
+;;;###autoload
+(defun lookup-read-string (prompt &optional init history default)
+  "`read-string' に似ているが、オプション DEFAULT が指定されば場合、
+プロンプトにその値を (defaut DEFAULT) のように表示する。PROMPT には
+自動的に \": \" が付加される。"
+  (let ((lookup-read-string-default default)
+	(minibuffer-local-map lookup-read-string-map))
+    (read-string (if default
+		     (concat prompt " (default " default "): ")
+		   (concat prompt ": "))
+		 init history default)))
+
 (cond
  ((featurep 'xemacs)
   (defun lookup-backward-char ()
@@ -209,31 +228,6 @@ non-nil を返したものだけを新たにリストとして生成する。
 	   (insert minibuffer-default))
 	  (t
 	   (backward-delete-char 1))))))
-
-(defun lookup-read-string (prompt &optional init history default inherit)
-  "`read-string' に似ているが、オプション DEFAULT が指定されば場合、
- プロンプトにその値を (defaut DEFAULT) のように表示する。PROMPT には
- 自動的に \": \" が付加される。"
-  (let ((lookup-read-string-default default))
-    (cond
-     ((equal ""
-	     (setq result
-		   (read-from-minibuffer 
-		    (if default
-			(concat prompt " (default " default "): ")
-		      (concat prompt ": "))
-		    init
-		    (let ((now-map (copy-keymap minibuffer-local-map)))
-		      (define-key now-map  "\C-?" 'lookup-backward-char)
-		      (define-key now-map  "\C-h" 'lookup-backward-char)
-		      (if (fboundp 'next-history-element)
-			  (define-key now-map  "\C-n" 'next-history-element))
-		      (if (fboundp 'previous-history-element)
-			  (define-key now-map  "\C-p" 'previous-history-element))
-		      now-map)
-		    nil history default)))
-      default)
-     (result))))
 
 (defun lookup-map-over-property (from to prop func &optional object)
   "FROM から TO までのリージョンにある各 PROP に対して、FUNC を実行する。
