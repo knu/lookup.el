@@ -127,7 +127,7 @@
       (error "Module `%s' already exists" name))
   (let ((lookup-current-module (lookup-new-module name t)))
     (setq lookup-module-list
-	  (cons lookup-current-module lookup-module-list))
+	  (nconc lookup-module-list (list lookup-current-module)))
     (lookup-select-dictionaries lookup-current-module))
   (princ name))
 
