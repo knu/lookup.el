@@ -170,7 +170,7 @@
     (let ((buffer (lookup-open-process-buffer " *ndspell*")))
       (setq ndspell-process
 	    (start-process "ndspell" buffer ndspell-ispell-program
-			   "-a" "-m" "-C"))
+			   "-a" "-m" "-S"))
       (process-kill-without-query ndspell-process)
       (accept-process-output ndspell-process)
       (let ((coding ndspell-process-coding-system))
