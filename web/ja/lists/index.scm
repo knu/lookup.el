@@ -8,12 +8,12 @@
 (define subbody
   (string-append
    ##(dl
-      ##(dt "lookup-ja@ring.gr.jp")
+      ##(dt "lookup@ring.gr.jp")
       ##(dd "Lookup に関する情報交換を行なうためのメーリングリストです。"
 	    "参加を希望される方は、"
-	    ##(a #:href "mailto:lookup-ja-request@ring.gr.jp"
-		 "lookup-ja-request@ring.gr.jp")
-	    "宛てに、本文に \"subscribe\" と書いたメールを送って下さい。")
+	    ##(a #:href "mailto:lookup-subscribe@ring.gr.jp"
+		 "lookup-subscribe@ring.gr.jp")
+	    "宛てに空のメールを送って下さい。")
       ##(ul
 	 ##(li ##(a #:href "http://news.ring.gr.jp/news/openlab.lookup-ja/"
 		    "アーカイブ"))
