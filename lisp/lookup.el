@@ -277,7 +277,7 @@ See `lookup-pattern' for details."
 (defun lookup-word (word &optional module)
   "Search for the word near the cursor."
   (interactive (lookup-word-input))
-  (let ((lookup-search-method lookup-default-method))
+  (let ((lookup-search-method 'default))
     (lookup-pattern word module)))
 
 ;;;###autoload
@@ -454,11 +454,6 @@ See `lookup-secondary' for details."
 		   (lookup-dictionary-option dict ':hiragana))
 		  (let ((query-str (lookup-query-string query))
 			entry-list)
-		    (cond
-		     ((string-match "^\\([^*]+\\)\\*$" query-str)
-		      (setq query-str (match-string 1 query-str)))
-		     ((string-match "^\\*\\([^*]+\\)$" query-str)
-		      (setq query-str (match-string 1 query-str))))
 		    (mapcar
 		     (lambda (yomi)
 		       (mapcar
