@@ -30,7 +30,7 @@
  (fboundp 'overlay-lists)
  (require 'overlay))
 
-(defconst lookup-version "1.99.1"
+(defconst lookup-version "1.99.2"
   "The version numbers of Lookup.")
 
 
