@@ -1,3 +1,28 @@
+;;; lookup-glyph.el --- glyph function definitions cut off from lookup-types.el
+; -*- coding: iso-2022-7bit -*-
+;; Copyright (C) 2002 yamagata@nwgpc.kek.jp
+
+;; Author: yamagata@nwgpc.kek.jp
+;; Keywords: dictionary
+
+;; This file is part of Lookup.
+
+;; Lookup is free software; you can redistribute it and/or modify it
+;; under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2 of the License, or
+;; (at your option) any later version.
+
+;; Lookup is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with Lookup; if not, write to the Free Software Foundation,
+;; Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+;;; Code:
+
 ;; gaiji glyph
 
 (defvar image-types nil) ;; for emacs-20.7 etc.
