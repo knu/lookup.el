@@ -309,6 +309,17 @@
 		      (cdr pair)))
 		lookup-arrange-table)))))
 
+(defun lookup-dictionary-adjusts (dictionary)
+  (lookup-dictionary-get dictionary 'adjust-table
+    (lambda ()
+      (let* ((table1 (lookup-dictionary-option dictionary :adjust-table))
+	     (table2 (lookup-dictionary-ref dictionary :adjust-table)))
+	(mapcar (lambda (pair)
+		  (or (lookup-assq-get table1 (car pair))
+		      (lookup-assq-get table2 (car pair))
+		      (cdr pair)))
+		lookup-adjust-table)))))
+
 (defun lookup-dictionary-gaiji-table (dictionary)
   (lookup-dictionary-get dictionary 'gaiji-table
     (lambda () (or (lookup-dictionary-option dictionary :gaiji-table)
@@ -425,6 +436,10 @@
 (defun lookup-new-entry (type dictionary code &optional heading)
   (let (entry)
     (cond
+     ((eq type 'example)
+      (setq entry (lookup-get-entry
+	     (concat (lookup-dictionary-id dictionary) "#" code)))
+      (setq type 'regular))
      ((eq type 'regular)
       (if (setq entry (lookup-get-entry
 		       (concat (lookup-dictionary-id dictionary) "#" code)))
@@ -602,54 +617,10 @@
     (insert (or alter glyph))
     (if alter (put-text-property start (point) 'lookup-gaiji gaiji))))
 
-;; gaiji glyph
 
-(cond
- ((featurep 'xemacs)
-  (defun lookup-gaiji-glyph-compose (spec)
-    (cond
-     ((stringp spec)
-      (make-glyph (vector 'string :data spec)))
-     ((eq (aref spec 0) 'compose)
-      (make-glyph (vector 'string :data (aref spec 1))))
-     ((eq (aref spec 0) 'xbm)
-      (make-glyph (vector 'xbm :data (lookup-decode-graph spec))))
-     (t (error "Invalid glyph spec: %S" spec))))
+;; glyph functions are defined in lookup-glyph.el
 
-  (defun lookup-gaiji-glyph-paste (start end glyph)
-    (set-extent-property (extent-at start nil 'lookup-gaiji) 'invisible t)
-    (let (extent extents)
-      (while (setq extent (extent-at start nil nil extent 'at))
-	(if (eq (extent-start-position extent) (extent-end-position extent))
-	    (setq extents (cons extent extents))))
-      (while extents
-	(set-extent-endpoints (car extents) end end)
-	(setq extents (cdr extents)))
-      (set-extent-begin-glyph (make-extent end end) glyph))))
- (t
-  (defun lookup-gaiji-glyph-compose (spec)
-    (cond
-     ((eq (aref spec 0) 'xbm)
-      (let (width height data)
-	(with-temp-buffer
-	  (insert (aref spec 1))
-	  (goto-char (point-min))
-	  (if (re-search-forward "width[ \t]+\\([0-9]+\\)")
-	      (setq width (string-to-int (match-string 1))))
-	  (if (re-search-forward "height[ \t]+\\([0-9]+\\)")
-	      (setq height (string-to-int (match-string 1))))
-	  (while (re-search-forward "0x\\(..\\)" nil t)
-	    (setq data (cons (string-to-int (match-string 1) 16) data)))
-	  (setq data (concat (nreverse data))))
-	(list 'image :type 'xbm :ascent 'center
-	      :width width :height height :data data)))
-     (t (error "Invalid glyph spec: %S" spec))))
-
-  (defun lookup-gaiji-glyph-paste (start end glyph)
-    (add-text-properties start end
-			 (list 'display glyph
-			       'intangible glyph
-			       'rear-nonsticky (list 'display))))))
+(require 'lookup-glyph)
 
 ;; gaiji table
 
