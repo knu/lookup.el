@@ -27,7 +27,7 @@ AC_DEFUN(AM_PATH_LISPDIR,
        *)	EMACS=${withval} ;;
      esac], EMACS=)
   if test "x$EMACS" = "xt" -o "x$EMACS" = x; then
-    AC_PATH_PROGS(EMACS, emacs xemacs mule, no)
+    AC_PATH_PROGS(EMACS, emacs xemacs, no)
     if test $EMACS = no; then
       AC_MSG_ERROR(you should install Emacs first)
     fi
@@ -90,14 +90,6 @@ AC_DEFUN(AM_PATH_LISPDIR,
   AC_MSG_CHECKING([where .elc files should go])
   if test "x$lispdir" = x; then
     lispdir="$emacsdir/site-lisp"
-    if test -d $emacsdir/lisp; then
-      lispdir="$emacsdir/lisp"
-    fi
-    case "$EMACS_BASENAME" in
-    xemacs|xemacs-*)
-      lispdir="$lispdir/lookup"
-      ;;
-    esac
   fi
   AC_MSG_RESULT($lispdir)
   AC_SUBST(lispdir)])
