@@ -1000,7 +1000,7 @@ Lookup では他にも、次のような特殊な検索エージェントが標準で利用可能です。
 @end menu
 
 @node ndnmz agent, ndkks agent, Miscellaneous Dictionary, Miscellaneous Dictionary
-@subsection 
+@subsection Namazu
 
 @node ndkks agent, ndspell agent, ndnmz agent, Miscellaneous Dictionary
 @subsection 日本語の読みを調べる
