@@ -323,7 +323,9 @@
 (and
  ndeb-use-inline-image
  window-system
- (memq 'xbm image-types)
+ (or
+  (featurep 'xemacs)
+  (memq 'xbm image-types))
  (require 'ndeb-image))
 
 ;;; ndeb.el ends here
