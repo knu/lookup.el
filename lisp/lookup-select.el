@@ -41,12 +41,12 @@
 
 (defun lookup-select-build-buffer (module)
   (let ((inhibit-read-only t))
+    (make-local-variable 'lookup-current-module)
+    (setq lookup-current-module module)
     (erase-buffer)
     (insert "Type `m' to select, `u' to unselect, `q' to leave, "
 	    "`?' for help.\n")
-    (insert "This module : " (lookup-module-name module)
-	    " / Current module : " (lookup-module-name (lookup-current-module))
-	    "\n")
+    (insert "This module : " (lookup-module-name module) "\n")
     (lookup-table-insert
      "%c %-15t %-18t %s\n"
      (append
