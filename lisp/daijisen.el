@@ -91,7 +91,13 @@
 	  (insert "> " daijisen-program-name " " (mapconcat 'eval opts " ") "\n"))
       (save-excursion
 	(lookup-with-coding-system daijisen-process-coding-system
-	  (apply 'call-process daijisen-program-name nil t nil opts)))
+	  (apply 'call-process daijisen-program-name nil t nil
+		 (mapcar
+		  '(lambda (str)
+		     (encode-coding-string
+		      str
+		      daijisen-process-coding-system))
+		  opts))))
       (and
        kanji
        (< 8 (length (car yomi-list)))
