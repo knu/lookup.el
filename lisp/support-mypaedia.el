@@ -38,7 +38,7 @@
   "t なら検索と同時に音声を再生する。")
 (defvar mypaedia-video-without-notice nil
   "t なら検索と同時に動画を再生する。")
-(defvar mypaedia-image-inline t
+(defvar mypaedia-image-inline window-system
   "nil なら (可能な場合でも) 画像をインライン表示しない。")
 (defvar perl-process "perl"
   "perl のプロセス名。パスが通っていない場合はフルパスで記述すること。")
