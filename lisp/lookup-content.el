@@ -55,7 +55,7 @@
   (define-key lookup-content-mode-map "g" 'lookup-content-update)
   (define-key lookup-content-mode-map "q" 'lookup-content-leave)
   (define-key lookup-content-mode-map
-    (if (featurep 'xemacs) 'button2 [mouse-2]) 'lookup-content-mouse-follow)
+    (if (xemacs-p) 'button2 [mouse-2]) 'lookup-content-mouse-follow)
   )
 
 (defvar lookup-content-mode-hook nil)
