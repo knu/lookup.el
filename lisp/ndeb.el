@@ -47,6 +47,8 @@
   :type 'symbol
   :group 'ndeb)
 
+(defvar ndeb-use-inline-image t)
+
 
 ;;;
 ;;; Internal varialbes
@@ -60,8 +62,8 @@
 ;;; types
 ;;;
 
-(put 'ndeb :gaiji-regexp "<gaiji=\\([^>]*\\)>")
-(put 'ndeb :reference-pattern
+(put 'ndeb ':gaiji-regexp "<gaiji=\\([^>]*\\)>")
+(put 'ndeb ':reference-pattern
      (list (concat "<reference>\\(→?\\(\\([^<]\\|<gaiji=[^>]*>\\)+\\)\\)"
 		   "</reference=\\([^>]*\\)>") 1 2 4))
 
@@ -82,11 +84,11 @@
   (expand-file-name (lookup-agent-location agent)))
 
 (defun ndeb-agent-appendix (agent)
-  (let ((dir (lookup-agent-option agent :appendix)))
+  (let ((dir (lookup-agent-option agent ':appendix)))
     (if dir (expand-file-name dir))))
 
 (defun ndeb-agent-coding (agent)
-  (or (lookup-agent-option agent :coding)
+  (or (lookup-agent-option agent ':coding)
       ndeb-process-coding-system))
 
 ;; ndeb dictionary:
@@ -98,11 +100,11 @@
 ;; :stop-code - stop-code used by eblook
 
 (defun ndeb-dictionary-coding (dictionary)
-  (or (lookup-dictionary-option dictionary :coding t)
+  (or (lookup-dictionary-option dictionary ':coding t)
       ndeb-process-coding-system))
 
 (defun ndeb-dictionary-stopcode (dictionary)
-  (lookup-dictionary-option dictionary :stop-code t))
+  (lookup-dictionary-option dictionary ':stop-code t))
 
 ;; ndeb entry:
 ;;
@@ -118,28 +120,27 @@
 
 (put 'ndeb-with-agent 'lisp-indent-function 1)
 (defmacro ndeb-with-agent (agent &rest body)
-  `(let ((ndeb-current-agent ,agent)
-	 (ndeb-current-process (ndeb-agent-process ,agent)))
-     ,@body))
+  (` (let ((ndeb-current-agent (, agent))
+	   (ndeb-current-process (ndeb-agent-process (, agent))))
+       (,@ body))))
 
 (put 'ndeb-with-dictionary 'lisp-indent-function 1)
 (defmacro ndeb-with-dictionary (dictionary &rest body)
-  `(let ((dictionary ,dictionary))
-     (ndeb-with-agent (lookup-dictionary-agent dictionary)
-       (let ((ndeb-current-dictionary dictionary))
-	 (unless (eq dictionary
-		     (lookup-get-property ndeb-current-agent 'ndeb-dict))
+  (` (ndeb-with-agent (lookup-dictionary-agent (, dictionary))
+       (let ((ndeb-current-dictionary (, dictionary)))
+	 (unless (eq (, dictionary)
+		     (lookup-agent-get-property ndeb-current-agent 'ndeb-dict))
 	   (ndeb-process-require
-	    (concat "select " (lookup-dictionary-name dictionary)))
-	   (lookup-put-property ndeb-current-agent 'ndeb-dict
-				dictionary)
-	   (let ((code (ndeb-dictionary-coding dictionary)))
+	    (concat "select " (lookup-dictionary-name (, dictionary))))
+	   (lookup-agent-put-property ndeb-current-agent 'ndeb-dict
+				      (, dictionary))
+	   (let ((code (ndeb-dictionary-coding (, dictionary))))
 	     (when code
 	       (set-process-coding-system ndeb-current-process code code))))
-	 ,@body))))
+	 (,@ body)))))
 
 (defun ndeb-agent-process (agent)
-  (let ((process (lookup-get-property agent 'ndeb-process)))
+  (let ((process (lookup-agent-get-property agent 'ndeb-process)))
     (unless (and process (eq (process-status process) 'run))
       (if process (lookup-process-kill process))
       (setq process (ndeb-process-open (ndeb-agent-directory agent)
@@ -150,26 +151,26 @@
       (let ((ndeb-current-process process))
 	(if lookup-max-hits (ndeb-require-set "max-hits" lookup-max-hits))
 	(if lookup-max-text (ndeb-require-set "max-text" lookup-max-text)))
-      (lookup-put-property agent 'ndeb-process process)
-      (lookup-put-property agent 'ndeb-dict nil)
-      (lookup-put-property agent 'ndeb-method nil)
-      (lookup-put-property agent 'ndeb-stop nil))
+      (lookup-agent-put-property agent 'ndeb-process process)
+      (lookup-agent-put-property agent 'ndeb-dict nil)
+      (lookup-agent-put-property agent 'ndeb-method nil)
+      (lookup-agent-put-property agent 'ndeb-stop nil))
     process))
 
 (defun ndeb-agent-kill-process (agent)
-  (let ((process (lookup-get-property agent 'ndeb-process)))
+  (let ((process (lookup-agent-get-property agent 'ndeb-process)))
     (when process
       (if (eq (process-status process) 'run)
 	  (process-send-string process "quit\n"))
       (lookup-process-kill process)
-      (lookup-put-property agent 'ndeb-process nil))))
+      (lookup-agent-put-property agent 'ndeb-process nil))))
 
 
 ;;;
 ;;; Interface functions
 ;;;
 
-(put 'ndeb :list 'ndeb-list)
+(put 'ndeb ':list 'ndeb-list)
 (defun ndeb-list (agent)
   (ndeb-with-agent agent
     (ndeb-process-require "list"
@@ -180,15 +181,15 @@
 						     (match-string 1)) dicts)))
 	  (nreverse dicts))))))
 
-(put 'ndeb :kill 'ndeb-agent-kill-process)
+(put 'ndeb ':kill 'ndeb-agent-kill-process)
 
-(put 'ndeb :title 'ndeb-dictionary-title)
+(put 'ndeb ':title 'ndeb-dictionary-title)
 (defun ndeb-dictionary-title (dictionary)
   (ndeb-dictionary-get-info dictionary "title"))
 
-(put 'ndeb :methods 'ndeb-dictionary-methods)
+(put 'ndeb ':methods 'ndeb-dictionary-methods)
 (defun ndeb-dictionary-methods (dictionary)
-  (let* ((string (ndeb-dictionary-get-info dictionary "search methods"))
+  (let* ((string (or (ndeb-dictionary-get-info dictionary "search methods") ""))
 	 (methods (if (string-match "menu" string) '(menu))))
     (if (string-match "endword" string)
 	(setq methods (cons 'suffix methods)))
@@ -199,7 +200,7 @@
     methods))
 
 (defun ndeb-dictionary-get-info (dictionary key)
-  (let ((alist (lookup-get-property dictionary 'ndeb-alist)))
+  (let ((alist (lookup-dictionary-get-property dictionary 'ndeb-alist)))
     (unless alist
       (setq alist
 	    (ndeb-with-dictionary dictionary
@@ -207,32 +208,32 @@
 		(lambda (process)
 		  (let (alist)
 		    (while (re-search-forward "^ \\([^:]+\\): \\(.*\\)" nil t)
-		      (setq alist
-			    (acons (match-string 1) (match-string 2) alist)))
+		      (setq alist (cons (cons (match-string 1)
+					      (match-string 2)) alist)))
 		    alist)))))
-      (lookup-put-property dictionary 'ndeb-alist alist))
+      (lookup-dictionary-put-property dictionary 'ndeb-alist alist))
     (lookup-assoc-get alist key)))
 
-(put 'ndeb :menu 'ndeb-dictionary-menu)
+(put 'ndeb ':menu 'ndeb-dictionary-menu)
 (defun ndeb-dictionary-menu (dictionary)
   (ndeb-with-dictionary dictionary
     (let ((menu (ndeb-new-entry 'regular "menu" "[menu]"))
 	  (content (ndeb-process-require "menu")))
-      (lookup-put-property menu 'ndeb-content content)
+      (lookup-entry-put-property menu 'ndeb-content content)
       menu)))
 
 (defconst ndeb-method-table
   '((exact . "exact") (prefix . "word") (suffix . "endword")))
 
-(put 'ndeb :search 'ndeb-dictionary-search)
+(put 'ndeb ':search 'ndeb-dictionary-search)
 (defun ndeb-dictionary-search (dictionary query &optional offset)
   (ndeb-with-dictionary dictionary
     (let ((method (lookup-query-method query))
-	  (last (lookup-get-property ndeb-current-agent 'ndeb-method)))
+	  (last (lookup-agent-get-property ndeb-current-agent 'ndeb-method)))
       (unless (eq method last)
 	(ndeb-require-set "search-method"
 			  (lookup-assq-get ndeb-method-table method))
-	(lookup-put-property ndeb-current-agent 'ndeb-method method)))
+	(lookup-agent-put-property ndeb-current-agent 'ndeb-method method)))
     (ndeb-process-require (format "search \"%s\" %d"
 				  (lookup-query-string query) (or offset 0))
       (lambda (process)
@@ -247,38 +248,38 @@
 	      (setq last-code code last-heading heading)))
 	  (when (re-search-forward "<more point=\\([0-9]*\\)>" nil t)
 	    (setq entry (ndeb-new-entry 'dynamic "more"))
-	    (lookup-put-property entry 'ndeb-query query)
-	    (lookup-put-property entry 'ndeb-offset
-				 (string-to-int (match-string 1)))
+	    (lookup-entry-put-property entry 'ndeb-query query)
+	    (lookup-entry-put-property entry 'ndeb-offset
+				       (string-to-int (match-string 1)))
 	    (setq entries (cons entry entries)))
 	  (nreverse entries))))))
 
-(put 'ndeb :dynamic 'ndeb-dynamic-search)
+(put 'ndeb ':dynamic 'ndeb-dynamic-search)
 (defun ndeb-dynamic-search (entry)
-  (let ((query (lookup-get-property entry 'ndeb-query))
-	(offset (lookup-get-property entry 'ndeb-offset)))
+  (let ((query (lookup-entry-get-property entry 'ndeb-query))
+	(offset (lookup-entry-get-property entry 'ndeb-offset)))
     (ndeb-dictionary-search (lookup-entry-dictionary entry) query offset)))
 
-(put 'ndeb :gaiji 'ndeb-dictionary-gaiji)
+(put 'ndeb ':gaiji 'ndeb-dictionary-gaiji)
 (defun ndeb-dictionary-gaiji (dictionary code)
   (list (ndeb-dictionary-font dictionary code)))
 
-(put 'ndeb :font 'ndeb-dictionary-font)
+(put 'ndeb ':font 'ndeb-dictionary-font)
 (defun ndeb-dictionary-font (dictionary code)
   (ndeb-with-dictionary dictionary
     (let ((xbm (ndeb-process-require (concat "font " code))))
       (if (string-match "default_width" xbm)
 	  (vector 'xbm xbm)))))
 
-(put 'ndeb :content 'ndeb-entry-content)
+(put 'ndeb ':content 'ndeb-entry-content)
 (defun ndeb-entry-content (entry)
-  (or (lookup-get-property entry 'ndeb-content)
+  (or (lookup-entry-get-property entry 'ndeb-content)
       (ndeb-with-dictionary (lookup-entry-dictionary entry)
 	(let ((stop (ndeb-dictionary-stopcode ndeb-current-dictionary))
-	      (last (lookup-get-property ndeb-current-agent 'ndeb-stop)))
+	      (last (lookup-agent-get-property ndeb-current-agent 'ndeb-stop)))
 	  (unless (eq stop last)
 	    (ndeb-require-set "stop-code" stop)
-	    (lookup-put-property ndeb-current-agent 'ndeb-stop stop)))
+	    (lookup-agent-put-property ndeb-current-agent 'ndeb-stop stop)))
 	(ndeb-process-require (concat "content " (lookup-entry-code entry))))))
 
 
@@ -289,6 +290,7 @@
 (defun ndeb-process-open (directory appendix)
   (let* ((args (cons "-q" (cons directory (if appendix (list appendix)))))
 	 (buffer (lookup-open-process-buffer (concat " *ndeb+" directory "*")))
+	 (process-connection-type nil)
 	 (process (apply 'start-process "ndeb" buffer ndeb-program-name args)))
     (process-kill-without-query process)
     (accept-process-output process)
@@ -313,5 +315,8 @@
     (ndeb-process-require (format "unset %s" var))))
 
 (provide 'ndeb)
+
+(if ndeb-use-inline-image
+    (require 'ndeb-image))
 
 ;;; ndeb.el ends here
