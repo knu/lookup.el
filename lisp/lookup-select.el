@@ -119,6 +119,7 @@ Search Methods:
   (define-key lookup-select-mode-map "\C-x\C-t" 'lookup-select-wrap-command)
   (define-key lookup-select-mode-map [?\C-/] 'lookup-select-wrap-command)
   ;; general commands
+  (define-key lookup-select-mode-map "C" 'lookup-modules-create-module)
   (define-key lookup-select-mode-map "^" 'lookup-list-modules)
   (define-key lookup-select-mode-map "g" 'lookup-select-update)
   (define-key lookup-select-mode-map "q" 'lookup-leave)
