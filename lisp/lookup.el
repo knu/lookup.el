@@ -479,7 +479,7 @@ Otherwise, this is the same with \\[lookup-previous-history]."
 (defun lookup-input-pattern ()
   (let ((default (lookup-current-word)))
     (if (string-equal default "") (setq default nil))
-    (lookup-read-string "Look up" nil 'lookup-input-history default t)))
+    (lookup-read-string "Look up" nil 'lookup-input-history default)))
 
 (defun lookup-input-module ()
   (lookup-get-module
