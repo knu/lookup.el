@@ -450,8 +450,8 @@ See `lookup-secondary' for details."
 	      (let ((entries
 		     (cond
 		      ((or
-			(lookup-dictionary-option dict ':katakana)
-			(lookup-dictionary-option dict ':hiragana))
+			(lookup-dictionary-option dict ':katakana t)
+			(lookup-dictionary-option dict ':hiragana t))
 		       (let ((query-str (lookup-query-string query))
 			     entry-list)
 			 (cond
@@ -477,9 +477,9 @@ See `lookup-secondary' for details."
 			       (lookup-new-query
 				(lookup-query-method query)
 				(cond
-				 ((lookup-dictionary-option dict ':hiragana)
+				 ((lookup-dictionary-option dict ':hiragana t)
 				  yomi)
-				 ((lookup-dictionary-option dict ':katakana)
+				 ((lookup-dictionary-option dict ':katakana t)
 				  (japanese-katakana yomi)))))))
 			  (lookup-kanji-get-readings
 			   (lookup-query-string query)))
