@@ -426,77 +426,80 @@ See `lookup-secondary' for details."
 ;		   (string= (lookup-query-string query)
 ;			    (lookup-query-string last)))))
 ;      (lookup-session-display  (lookup-history-ref lookup-search-history))
-    (lookup-with-message (format "Looking up `%s'" (lookup-query-pattern query))
-      (let ((lookup-dynamic-display t)
-	    found valid)
-	(do ((mod module next-module)
-	     (next-module nil (lookup-nth-module 1 mod)))
-	    ((or found (eq next-module module)))
-	  (dolist (dict (or lookup-search-dictionaries
-			    (lookup-module-dictionaries mod)))
-	    (when (and
-		   ;; Check dictionary priority
-		   (or lookup-search-dictionaries
-		       (let ((p (lookup-module-dictionary-priority mod dict)))
-			 (cond ((eq p t) t)
-			       ((eq p 'secondary) (not found))
-			       ((eq p 'supplement) found))))
-		   ;; Check search method
-		   (let ((method (lookup-query-method query)))
-		     (or (eq method 'default)
-			 (memq method (lookup-dictionary-methods dict)))))
-	      (setq valid t)
-	      (lookup-message (concat (lookup-dictionary-title dict) "..."))
-	      (let ((entries
-		     (cond
-		      ((or
-			(lookup-dictionary-option dict ':katakana t)
-			(lookup-dictionary-option dict ':hiragana t))
-		       (let ((query-str (lookup-query-string query))
-			     entry-list)
-			 (cond
-			  ((string-match "^\\([^*]+\\)\\*$" query-str)
-			   (setq query-str (match-string 1 query-str)))
-			  ((string-match "^\\*\\([^*]+\\)$" query-str)
-			   (setq query-str (match-string 1 query-str))))
-			 (mapcar
-			  '(lambda (yomi)
-			     (mapcar
-			      '(lambda (entry)
-				 (let ((heading (lookup-entry-heading entry)))
-				   (message (format "query %s/%s/%s" query-str yomi heading))
-				   (and
-				    (or
-				     (lookup-dictionary-option dict ':no-filter)
-				     (string-match query-str heading))
-				    (setq
-				     entry-list
-				     (cons entry entry-list)))))
-			      (lookup-dictionary-search
-			       dict
-			       (lookup-new-query
-				(lookup-query-method query)
-				(cond
-				 ((lookup-dictionary-option dict ':hiragana t)
-				  yomi)
-				 ((lookup-dictionary-option dict ':katakana t)
-				  (japanese-katakana yomi)))))))
-			  (lookup-kanji-get-readings
-			   (lookup-query-string query)))
-			 entry-list))
-		      (t
-		       (lookup-dictionary-search dict query)))))
-		(when entries
-		  (if found
-		      (lookup-summary-append entries)
-		    (setq found t)
-		    (let ((session (lookup-new-session mod query entries)))
-		      (lookup-session-open session))))))))
-	(cond
-	 ((not valid) (error "No valid dictionary for method `%s'"
-			     (lookup-query-method query)))
-	 ((not found) (error "No entry for query: %s"
-			     (lookup-query-pattern query)))))))
+  (unless lookup-module-list
+    (lookup-restart))
+  (lookup-with-message
+   (format "Looking up `%s'" (lookup-query-pattern query))
+   (let ((lookup-dynamic-display t)
+	 found valid)
+     (do ((mod module next-module)
+	  (next-module nil (lookup-nth-module 1 mod)))
+	 ((or found (null mod) (eq next-module module)))
+       (dolist (dict (or lookup-search-dictionaries
+			 (lookup-module-dictionaries mod)))
+	 (when (and
+		;; Check dictionary priority
+		(or lookup-search-dictionaries
+		    (let ((p (lookup-module-dictionary-priority mod dict)))
+		      (cond ((eq p t) t)
+			    ((eq p 'secondary) (not found))
+			    ((eq p 'supplement) found))))
+		;; Check search method
+		(let ((method (lookup-query-method query)))
+		  (or (eq method 'default)
+		      (memq method (lookup-dictionary-methods dict)))))
+	   (setq valid t)
+	   (lookup-message (concat (lookup-dictionary-title dict) "..."))
+	   (let ((entries
+		  (cond
+		   ((or
+		     (lookup-dictionary-option dict ':katakana)
+		     (lookup-dictionary-option dict ':hiragana))
+		    (let ((query-str (lookup-query-string query))
+			  entry-list)
+		      (cond
+		       ((string-match "^\\([^*]+\\)\\*$" query-str)
+			(setq query-str (match-string 1 query-str)))
+		       ((string-match "^\\*\\([^*]+\\)$" query-str)
+			(setq query-str (match-string 1 query-str))))
+		      (mapcar
+		       '(lambda (yomi)
+			  (mapcar
+			   '(lambda (entry)
+			      (let ((heading (lookup-entry-heading entry)))
+				(message (format "query %s/%s/%s" query-str yomi heading))
+				(and
+				 (or
+				  (lookup-dictionary-option dict ':no-filter)
+				  (string-match query-str heading))
+				 (setq
+				  entry-list
+				  (cons entry entry-list)))))
+			   (lookup-dictionary-search
+			    dict
+			    (lookup-new-query
+			     (lookup-query-method query)
+			     (cond
+			      ((lookup-dictionary-option dict ':hiragana)
+			       yomi)
+			      ((lookup-dictionary-option dict ':katakana)
+			       (japanese-katakana yomi)))))))
+		       (lookup-kanji-get-readings
+			(lookup-query-string query)))
+		      entry-list))
+		   (t
+		    (lookup-dictionary-search dict query)))))
+	     (when entries
+	       (if found
+		   (lookup-summary-append entries)
+		 (setq found t)
+		 (let ((session (lookup-new-session mod query entries)))
+		   (lookup-session-open session))))))))
+     (cond
+      ((not valid) (error "No valid dictionary for method `%s'"
+			  (lookup-query-method query)))
+      ((not found) (error "No entry for query: %s"
+			  (lookup-query-pattern query)))))))
 
 (defun lookup-display-entries (module query entries)
   (lookup-session-open (lookup-new-session module query entries)))
@@ -691,12 +694,15 @@ See `lookup-secondary' for details."
 (defvar lookup-current-module nil)
 
 (defun lookup-current-module ()
-  (let ((session (lookup-current-session)))
+  (let ((session (lookup-current-session))
+	(module  (or lookup-current-module
+		     (lookup-default-module))))
     (cond
+     ((eq major-mode 'lookup-select-mode)
+      module)
      (session
       (lookup-session-module session))
-     (lookup-current-module)
-     ((lookup-default-module)))))
+     (t module))))
 
 (defun lookup-default-module ()
   (let ((name (or (lookup-assq-get lookup-mode-module-alist major-mode)
