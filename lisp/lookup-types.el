@@ -154,12 +154,12 @@
 			     (unselected (member name unselect)))
 			(setq prio
 			      (cond
+			       ((memq :priority spec)
+				(plist-get spec :priority))
 			       (select
 				(consp selected))
 			       (unselect
 				(not (consp unselected)))
-			       ((memq :priority spec)
-				(plist-get spec :priority))
 			       (t
 				(or (lookup-dictionary-ref dict :priority)
 				    t))))
@@ -196,9 +196,13 @@
 (defstruct lookup-agent class location options id)
 
 (defun lookup-new-agent (class &optional location &rest options)
-  (let* ((agent (make-lookup-agent :class class :location location
-				   :id (concat (symbol-name class)
-					       ":" location)))
+  (let* ((agent
+	  (make-lookup-agent
+	   :class class
+	   :location location
+	   :id (or (plist-get options ':alias)
+		   (concat (symbol-name class)
+			   ":" location))))
 	 (opts (lookup-assoc-get lookup-agent-option-alist
 				 (lookup-agent-id agent))))
     (if opts
