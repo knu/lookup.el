@@ -19,9 +19,9 @@
 
 (require 'lookup)
 
-(defconst jargon-reference-pattern
-  '("{{?\\([^}]+\\)}}?" 1 (lookup-oneline-string (match-string 1))
-    lookup-dynamic-search))
+;(defconst jargon-reference-pattern
+;  '("{{?\\([^}]+\\)}}?" 1 (lookup-oneline-string (match-string 1))
+;    lookup-dynamic-search))
 
 (defun jargon-arrange-structure (entry)
   (if (looking-at "[^/\n]+")
@@ -29,7 +29,7 @@
 
 (setq lookup-support-options
       (list ':title "The Jargon File"
-	    ':reference-pattern jargon-reference-pattern
+;	    ':reference-pattern jargon-reference-pattern
 	    ':arrange-table '((structure . jargon-arrange-structure))))
 
 ;;; jargon.el ends here
