@@ -63,6 +63,7 @@ This can be used when you cannot finish Emacs because of an error of Lookup."
   (lookup-clear)
   (message "OK, you can exit Emacs"))
 
+;;;###autoload
 (defun lookup-debug ()
   "Toggle Lookup debug mode."
   (interactive)
@@ -213,13 +214,13 @@ Otherwise, this is the same with \\[lookup-previous-history]."
       (lookup-previous-history)
     (lookup-suspend)))
 
-(defun lookup-restart ()
+(defun lookup-restart (&optional arg)
   "Exit Lookup, initialize it again, and restart."
   (interactive)
   (when (or (not (interactive-p))
 	    (yes-or-no-p "Are you sure to restart Lookup? "))
     (lookup-exit)
-    (lookup-initialize)
+    (lookup-initialize arg)
     (lookup)))
 
 (defun lookup-help ()
@@ -446,7 +447,45 @@ See `lookup-secondary' for details."
 			 (memq method (lookup-dictionary-methods dict)))))
 	      (setq valid t)
 	      (lookup-message (concat (lookup-dictionary-title dict) "..."))
-	      (let ((entries (lookup-dictionary-search dict query)))
+	      (let ((entries
+		     (cond
+		      ((or
+			(lookup-dictionary-option dict ':katakana)
+			(lookup-dictionary-option dict ':hiragana))
+		       (let ((query-str (lookup-query-string query))
+			     entry-list)
+			 (cond
+			  ((string-match "^\\([^*]+\\)\\*$" query-str)
+			   (setq query-str (match-string 1 query-str)))
+			  ((string-match "^\\*\\([^*]+\\)$" query-str)
+			   (setq query-str (match-string 1 query-str))))
+			 (mapcar
+			  '(lambda (yomi)
+			     (mapcar
+			      '(lambda (entry)
+				 (let ((heading (lookup-entry-heading entry)))
+				   (message (format "query %s/%s/%s" query-str yomi heading))
+				   (and
+				    (or
+				     (lookup-dictionary-option dict ':no-filter)
+				     (string-match query-str heading))
+				    (setq
+				     entry-list
+				     (cons entry entry-list)))))
+			      (lookup-dictionary-search
+			       dict
+			       (lookup-new-query
+				(lookup-query-method query)
+				(cond
+				 ((lookup-dictionary-option dict ':hiragana)
+				  yomi)
+				 ((lookup-dictionary-option dict ':katakana)
+				  (japanese-katakana yomi)))))))
+			  (lookup-kanji-get-readings
+			   (lookup-query-string query)))
+			 entry-list))
+		      (t
+		       (lookup-dictionary-search dict query)))))
 		(when entries
 		  (if found
 		      (lookup-summary-append entries)
@@ -473,7 +512,7 @@ See `lookup-secondary' for details."
 
 (defun lookup-adjust-content (entry)
   (let ((funcs (lookup-dictionary-adjusts (lookup-entry-dictionary entry))))
-    (when (featurep 'xemacs) ;; remove gaiji-glyph definition
+    (when (xemacs-p) ;; remove gaiji-glyph definition
       (mapcar-extents
        '(lambda (foo)
 	  (set-extent-begin-glyph foo nil))))
@@ -797,7 +836,7 @@ See `lookup-secondary' for details."
     (pop-to-buffer buffer)))
 
 (cond
- ((featurep 'xemacs)
+ ((xemacs-p)
   (defun lookup-exclusive-frame-p ()
     (string= (cdr (assoc 'name (frame-parameters (selected-frame)))) "Lookup")))
  (t
@@ -811,15 +850,21 @@ See `lookup-secondary' for details."
 
 (defvar lookup-message nil)
 
-(put 'lookup-with-message 'lisp-indent-function 1)
-(defmacro lookup-with-message (msg &rest body)
-  `(let ((lookup-message ,msg))
-     (message "%s..." lookup-message)
-     (prog1 (progn ,@body)
-       (message "%s...done" lookup-message))))
+(if (functionp 'lookup-with-message)
+    nil
+  (message "defun lookup-with-message")
+  (put 'lookup-with-message 'lisp-indent-function 1)
+  (defmacro lookup-with-message (msg &rest body)
+    `(let ((lookup-message ,msg))
+       (message "%s..." lookup-message)
+       (prog1 (progn ,@body)
+	 (message "%s...done" lookup-message)))))
 
-(defun lookup-message (msg)
-  (message "%s... (%s)" lookup-message msg))
+(if (functionp 'lookup-message)
+    nil
+  (message "defun lookup-message")
+  (defun lookup-message (msg)
+    (message "%s... (%s)" lookup-message msg)))
 
 
 ;;;;;;;;;;;;;;;;;;;;
@@ -853,9 +898,9 @@ See `lookup-secondary' for details."
 ;;; Initialize Lookup
 ;;;
 
-(defun lookup-initialize ()
+(defun lookup-initialize (&optional arg)
   (load lookup-init-file t)
-  (when lookup-cache-file
+  (when (and (null arg) lookup-cache-file)
     (require 'lookup-cache)
     (load lookup-cache-file t)) 
   (setq lookup-search-history (lookup-new-history))
