@@ -105,10 +105,10 @@
 	(lookup-with-coding-system daijisen-process-coding-system
 	  (apply 'call-process daijisen-program-name nil t nil
 		 (mapcar
-		  '(lambda (str)
-		     (encode-coding-string
-		      str
-		      daijisen-process-coding-system))
+		  (lambda (str)
+		    (encode-coding-string
+		     str
+		     daijisen-process-coding-system))
 		  opts))))
       (and
        kanji

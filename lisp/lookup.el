@@ -460,27 +460,27 @@ See `lookup-secondary' for details."
 		     ((string-match "^\\*\\([^*]+\\)$" query-str)
 		      (setq query-str (match-string 1 query-str))))
 		    (mapcar
-		     '(lambda (yomi)
-			(mapcar
-			 '(lambda (entry)
-			    (let ((heading (lookup-entry-heading entry)))
-			      (message (format "query %s/%s/%s" query-str yomi heading))
-			      (and
-			       (or
-				(lookup-dictionary-option dict ':no-filter)
-				(string-match query-str heading))
-			       (setq
-				entry-list
-				(cons entry entry-list)))))
-			 (lookup-dictionary-search
-			  dict
-			  (lookup-new-query
-			   (lookup-query-method query)
-			   (cond
-			    ((lookup-dictionary-option dict ':hiragana)
-			     yomi)
-			    ((lookup-dictionary-option dict ':katakana)
-			     (japanese-katakana yomi)))))))
+		     (lambda (yomi)
+		       (mapcar
+			(lambda (entry)
+			  (let ((heading (lookup-entry-heading entry)))
+			    (message (format "query %s/%s/%s" query-str yomi heading))
+			    (and
+			     (or
+			      (lookup-dictionary-option dict ':no-filter)
+			      (string-match query-str heading))
+			     (setq
+			      entry-list
+			      (cons entry entry-list)))))
+			(lookup-dictionary-search
+			 dict
+			 (lookup-new-query
+			  (lookup-query-method query)
+			  (cond
+			   ((lookup-dictionary-option dict ':hiragana)
+			    yomi)
+			   ((lookup-dictionary-option dict ':katakana)
+			    (japanese-katakana yomi)))))))
 		     (lookup-kanji-get-readings
 		      (lookup-query-string query)))
 		    entry-list))
@@ -514,8 +514,8 @@ See `lookup-secondary' for details."
   (let ((funcs (lookup-dictionary-adjusts (lookup-entry-dictionary entry))))
     (when (xemacs-p) ;; remove gaiji-glyph definition
       (mapcar-extents
-       '(lambda (foo)
-	  (set-extent-begin-glyph foo nil))))
+       (lambda (foo)
+	 (set-extent-begin-glyph foo nil))))
     (let ((overlay (overlay-lists)))
       (mapc 'delete-overlay (car overlay))
       (mapc 'delete-overlay (cdr overlay)))
