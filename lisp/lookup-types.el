@@ -142,10 +142,23 @@
 			(setq dict spec spec nil)
 		      (setq dict (car spec) spec (cdr spec)))
 		    (setq dict (lookup-get-dictionary dict))
-		    (setq prio (if (memq :priority spec)
-				   (plist-get spec :priority)
-				 (or (lookup-dictionary-ref dict :priority)
-				     t)))
+		    (let* ((name (lookup-dictionary-name dict))
+			   (agent (lookup-dictionary-agent dict))
+			   (select (lookup-agent-option agent :select))
+			   (selected (member name select))
+			   (unselect (lookup-agent-option agent :unselect))
+			   (unselected (member name unselect)))
+		      (setq prio
+			    (cond
+			     (select
+			      (consp selected))
+			     (unselect
+			      (consp unselected))
+			     ((memq :priority spec)
+			      (plist-get spec :priority))
+			     (t
+			      (or (lookup-dictionary-ref dict :priority)
+				  t)))))
 		    (lookup-module-dictionary-set-priority module dict prio)
 		    dict)
 		  dicts))
