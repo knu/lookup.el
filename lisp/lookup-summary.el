@@ -170,24 +170,22 @@
 `m' - mark entry        `!' - put bookmark
 `u' - unmark entry      `#' - write memorandum  
 
-`b' - auto bookmark
-
 `M-p' - previous session
 `M-n' - next session
 `M-f' - forward module
 `M-b' - backward module
 
+`^'        - select module      `S'(elect)   - select dictionaries
+
 `v'(iew)   - toggle Overview  	`o'(pen)  - maximize window
 `s'(earch) - isearch-forward  	`w'(rite) - kill-ring-save contents
 
-`L'(inks)  - list references    `S'(elect)   - select dictionaries
+`L'(inks)  - list references    
 `M'(enu)   - display the menu   `B'(ookmark) - display the bookmarks
 
 `f'(ind)
-`c'(ontinuous)
 
 `t f' - toggle format
-`t g' - toggle gaiji
 `t b' - toggle autobook
 
 `g g' - search again            `g =' - redo exactly
@@ -215,7 +213,7 @@
   (define-key lookup-summary-mode-map "n" 'lookup-summary-next-entry)
   (define-key lookup-summary-mode-map "p" 'lookup-summary-previous-entry)
   (define-key lookup-summary-mode-map
-    (if (featurep 'xemacs) 'button2 [mouse-2]) 'lookup-summary-mouse-follow)
+    (if (xemacs-p) 'button2 [mouse-2]) 'lookup-summary-mouse-follow)
   ;; entry management
   (define-key lookup-summary-mode-map "i" 'lookup-summary-info)
   (define-key lookup-summary-mode-map "m" 'lookup-summary-mark)
@@ -239,10 +237,10 @@
   (define-key lookup-summary-mode-map "tb" 'lookup-summary-toggle-autobook)
   (define-key lookup-summary-mode-map "te" 'lookup-summary-toggle-example)
   (define-key lookup-summary-mode-map "tf" 'lookup-summary-toggle-format)
-  (define-key lookup-summary-mode-map "tg" 'lookup-summary-toggle-gaiji)
   (define-key lookup-summary-mode-map "tv" 'lookup-summary-toggle-overview)
   ;; new session
-  (define-key lookup-summary-mode-map "^" 'lookup-select-dictionaries)
+  (define-key lookup-summary-mode-map "^" 'lookup-list-modules)
+  (define-key lookup-summary-mode-map "S" 'lookup-select-dictionaries)
 ;  (define-key lookup-summary-mode-map "I" 'lookup-summary-show-index)
   (define-key lookup-summary-mode-map "L" 'lookup-summary-list-references)
   (define-key lookup-summary-mode-map "M" 'lookup-summary-dictionary-menu)
