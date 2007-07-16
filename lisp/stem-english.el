@@ -17,7 +17,7 @@
 
 ;; -*- Emacs-Lisp -*-
 
-(provide 'stem)
+(provide 'stem-english)
 
 (defvar stem:minimum-word-length 4 "Porter のアルゴリズムが適用できる最小語長")
 
