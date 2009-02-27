@@ -547,7 +547,8 @@ corresponding eblook commands."
 		     (>= (car (cdr link)) (car pos))
 		     (>= (cdr (cdr link)) (cdr pos)))
 	    (let* ((entries
-		    (list (lookup-make-entry
+		    (list (lookup-new-entry
+                           'regular
 			   (lookup-entry-dictionary
 			    lookup-content-entry)
 			   (cdr (car links))
