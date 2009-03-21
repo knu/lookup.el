@@ -80,7 +80,7 @@ Emacsの配布に含まれているものを使用する。"
       (let ((buffer (lookup-open-process-buffer " *lookup-mecab*")))
 	(setq process (apply 'start-process "lookup-mecab" buffer
 			     lookup-mecab-program args))
-	(process-kill-without-query process)
+	(set-process-query-on-exit-flag process nil)
 	;; 起動後、少し時間を置かないと、最初の検索がうまくいかない。
 	(sleep-for 0.1)
 	(let ((coding lookup-mecab-coding-system))
