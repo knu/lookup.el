@@ -140,34 +140,34 @@ EXTENSION is a filename extension without the leading dot."
   :type 'directory
   :group 'ndeb-binary)
 
-(defcustom ndeb-image-default-caption "$B2hA|(B"
+(defcustom ndeb-image-default-caption "画像"
   "Default string to be used when the caption of an image is empty."
   :type 'string
   :group 'ndeb-binary)
 
-(defcustom ndeb-image-caption-format "$B!R(B%s$B!S(B"
+(defcustom ndeb-image-caption-format "〈%s〉"
   "Format string for the caption of an image.
 This string is passed to `format' function with the original text."
   :type '(choice (const nil) string)
   :group 'ndeb-binary)
 
-(defcustom ndeb-sound-default-caption "$B2;@<(B"
+(defcustom ndeb-sound-default-caption "音声"
   "Default string to be used when the caption of a sound is empty."
   :type 'string
   :group 'ndeb-binary)
 
-(defcustom ndeb-sound-caption-format "$B!T(B%s$B!U(B"
+(defcustom ndeb-sound-caption-format "《%s》"
   "Format string for the caption of a sound.
 This string is passed to `format' function with the original text."
   :type '(choice (const nil) string)
   :group 'ndeb-binary)
 
-(defcustom ndeb-movie-default-caption "$BF02h(B"
+(defcustom ndeb-movie-default-caption "動画"
   "Default string to be used when the caption of a movie is empty."
   :type 'string
   :group 'ndeb-binary)
 
-(defcustom ndeb-movie-caption-format "$B!T(B%s$B!U(B"
+(defcustom ndeb-movie-caption-format "《%s》"
   "Format string for the caption of a movie.
 This string is passed to `format' function with the original text."
   :type '(choice (const nil) string)
@@ -901,7 +901,7 @@ Using this function with :snd-autoplay option is not recommendable."
 	  (error (message "%s" err)))))))
 
 (defun ndeb-arrange-image-page (entry)
-  ;; $B2hA|$N(Barrange$B4X?t$N8e$K8F$V;v(B
+  ;; 画像のarrange関数の後に呼ぶ事
   (when (search-forward  "<image-page>" nil t)
     (replace-match "")
     (let (areas)
