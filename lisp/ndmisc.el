@@ -97,6 +97,8 @@ CHARSET, URL and ENCODING may be a function.")
       (lookup-table-insert
        " → %c. %-10t     %-18t \n"
        (nreverse menu-items))
+      (goto-char (point-min))
+      (while (re-search-forward " +$" nil t) (replace-match ""))
       (buffer-string))))
 
 (put 'ndmisc :arrange-table
