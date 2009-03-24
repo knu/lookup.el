@@ -94,6 +94,7 @@ Windows/Linux version (ver 1.97), it should be '~'"
 (put 'ndlatin :kill     #'ndlatin-kill)
 (put 'ndlatin :title    #'ndlatin-dictionary-title)
 (put 'ndlatin :methods  '(exact))
+(put 'ndlatin :charsets '(ascii))
 (put 'ndlatin :search   #'ndlatin-dictionary-search)
 (put 'ndlatin :content  #'ndlatin-entry-content)
 
