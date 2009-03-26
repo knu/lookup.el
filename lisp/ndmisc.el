@@ -156,7 +156,8 @@ applying function to the string will be returned."
 
 (defun ndmisc-glyphwiki-charsetp (string)
   (or (lookup-text-charsetsp string '(ascii))
-      (string-match "^[⿰-⿻㐀-鿿豈-﫿𠀀-𯿿]+$" string)))
+      (lookup-text-single-cjk-p string)
+      (string-match "^[⿰-⿻][⿰-⿻㐀-鿿豈-﫿𠀀-𯿿]+$" string)))
 
 (defun ndmisc-glyphwiki-encode (string)
   (if (lookup-text-charsetsp string '(ascii)) string
