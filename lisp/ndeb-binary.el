@@ -39,17 +39,19 @@
     `(,(if (functionp 'mw32-mci-send-string)
 	   '(wave ndeb-binary-play-with-mci)
 	 '(wave ("fiber" "-s")))
+      (realaudio ("fiber" "-s"))
       (mpeg ("fiber" "-s"))
       (bmp ("fiber" "-s"))
       (xbm ("fiber" "-s"))
       (jpeg ("fiber" "-s"))))
-   ((eq window-system 'ns) ; Macintosh
+   ((eq system-type 'darwin) ; Macintosh
     '((wave ("open" "-W"))
+      (realaudio ("mplayer"))
       (mpeg ("open" "-W"))
       (bmp ("open" "-W"))
       (jpeg ("open" "-W"))
       (xbm ("open" "-W"))))
-   ((functionp 'play-sound-file)
+   ((functionp 'play-sound-internal)
     '((wave ndeb-binary-play-sound-file)))
    (t nil))
 "A list of programs to play binary data on an ndeb entry.
@@ -735,6 +737,10 @@ Using this function with :snd-autoplay option is not recommendable."
   (let (caption-format caption-face caption)
     (cond
      ((eq type 'wave)
+      (setq caption ndeb-sound-default-caption
+	    caption-format ndeb-sound-caption-format
+	    caption-face 'ndeb-sound-caption-face))
+     ((eq type 'realaudio)
       (setq caption ndeb-sound-default-caption
 	    caption-format ndeb-sound-caption-format
 	    caption-face 'ndeb-sound-caption-face))
