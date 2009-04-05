@@ -40,6 +40,7 @@
 	   '(wave ndeb-binary-play-with-mci)
 	 '(wave ("fiber" "-s")))
       (realaudio ("fiber" "-s"))
+      (midi ("fiber" "-s"))
       (mpeg ("fiber" "-s"))
       (bmp ("fiber" "-s"))
       (xbm ("fiber" "-s"))
@@ -47,6 +48,7 @@
    ((eq system-type 'darwin) ; Macintosh
     '((wave ("open" "-W"))
       (realaudio ("mplayer"))
+      (midi ("open" "-W"))
       (mpeg ("open" "-W"))
       (bmp ("open" "-W"))
       (jpeg ("open" "-W"))
