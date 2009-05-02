@@ -60,6 +60,8 @@ CHARSET, URL and ENCODING may be a function.")
 ;;; Interface Functions
 ;;;
 
+(put 'ndcookie :priority 'supplement)
+
 (put 'ndmisc :methods 'ndmisc-methods)
 (defun ndmisc-methods (dictionary)
   '(exact))
