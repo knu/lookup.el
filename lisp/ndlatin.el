@@ -180,11 +180,9 @@ It must be started with command directory."
                 (directory-file-name ndlatin-program)))
           (setq ndlatin-process
                 (start-process "ndlatin" buffer
-                               ndlatin-program)
-                ndlatin-status nil
-                ndlatin-vars nil)
+                               ndlatin-program))
           (set-process-coding-system ndlatin-process 'utf-8 'utf-8)
-          (process-kill-without-query ndlatin-process)
+          (set-process-query-on-exit-flag ndlatin-process nil)
           (catch 'started
             (while (accept-process-output ndlatin-process 10)
               (save-excursion

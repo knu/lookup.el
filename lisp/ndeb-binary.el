@@ -963,9 +963,10 @@ Using this function with :snd-autoplay option is not recommendable."
   
 (defun ndeb-arrange-snd-autoplay (entry)
   "Arrange function for Lookup to play sound in an ndeb entry if option :snd-autoplay is non-nil."
-  (when (and (lookup-dictionary-option dictionary :snd-autoplay nil)
-	     (assq 'wave ndeb-binary-programs))
-    (ndeb-binary-follow-first-link 'wave)))
+  (let ((dictionary (lookup-entry-dictionary entry)))
+    (when (and (lookup-dictionary-option dictionary :snd-autoplay nil)
+               (assq 'wave ndeb-binary-programs))
+      (ndeb-binary-follow-first-link 'wave))))
 
 ;;;
 ;;; Setup
