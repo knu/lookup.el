@@ -1,5 +1,8 @@
 ;;; lookup-compile.el
 
+(and (fboundp 'package-initialize)
+     (package-initialize))
+
 (defun lookup-bytecomp ()
   (setq lookup-byte-compiling t)
   (setq load-path (nconc '("." "agent") load-path))
